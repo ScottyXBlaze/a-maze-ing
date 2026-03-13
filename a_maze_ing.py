@@ -268,9 +268,13 @@ class Main:
         Returns:
             dict: the dictionary that contains every setting
         """
-        if len(sys.argv) != 2:
+        if len(sys.argv) == 1:
             print("Error: Missing config file argument.")
-            print("Usage: python a_maze_ing.py <config_file>")
+            print("Usage: 'python3 a_maze_ing.py <config_file>'")
+            sys.exit(1)
+        elif len(sys.argv) > 2:
+            print("Error: Too much arguments to load...")
+            print("Usage: 'python3 a_maze_ing.py <config_file>'")
             sys.exit(1)
         else:
             self.show_help()
@@ -493,7 +497,7 @@ class Main:
             self.win_mlx,
             self.width - 200,
             self.height - 50,
-            rgba(25, 22, 111),
+            rgba(255, 255, 255),
             "Please wait...",
         )
         self.m.mlx_do_sync(self.mlx_ptr)
@@ -620,5 +624,4 @@ if __name__ == "__main__":
         p.join()
     except KeyboardInterrupt:
         p.terminate()
-    finally:
         print("\n=== Exiting... ===")

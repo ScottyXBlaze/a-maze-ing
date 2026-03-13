@@ -93,7 +93,7 @@ class HuntAndKill:
         """
         bits = int(self._maze[pos[0]][pos[1]], 16)
         bit_index = self._dir_bits[direction]
-        bits &= ~(1 << bit_index)  # Clear the bit
+        bits &= ~(1 << bit_index)
         self._maze[pos[0]][pos[1]] = hex(bits)[2:].upper()
 
     def _add_wall(self, pos: tuple[int, int], direction: str) -> None:
@@ -183,20 +183,12 @@ class HuntAndKill:
                 pos[0] + self._dir_offsets.get(wall, (0, 0))[0],
                 pos[1] + self._dir_offsets.get(wall, (0, 0))[1],
             )
-
-            # condition in the maze
             if not self._is_valid_pos(
                 opposite_cell_pos[0], opposite_cell_pos[1]
             ):
                 continue
-
-            opposite_wall = self.check_walls(opposite_cell_pos)
-
-            if len(opposite_wall) < 2 or len(available_wall) < 2:
-                continue
-            else:
-                self._delete_wall_between(pos, opposite_cell_pos)
-                return
+            self._delete_wall_between(pos, opposite_cell_pos)
+            return
 
     def check_directions_unvisited(self, pos: tuple[int, int]) -> list[str]:
         """Check every directions of a cell that are unvisited.
@@ -271,19 +263,21 @@ class HuntAndKill:
         """
         for direction, offset in self._dir_offsets.items():
             tmp = pos[0] + offset[0], pos[1] + offset[1]
-            if self.check_walls(tmp) != ["N"]:
+            for wall in self.check_walls(tmp):
+                if wall not in [direction]:
+                    return False
+        walls = "NE"
+        for wall in walls:
+            tmp = (
+                self._dir_offsets.get(wall)[0] + pos[0],
+                self._dir_offsets.get(wall)[1] + pos[1],
+            )
+        for wall in self.check_walls(tmp):
+            if wall not in "NE":
                 return False
+        print(f"4 walls dispo in {pos} and need to be filled")
         return True
 
-        checks = "NE"
-        offset = pos
-        for check in checks:
-            tmp = self._dir_offsets.get(check)
-            offset = offset[0] + tmp[0], offset[1] + tmp[1]
-        for wall in self.check_walls(offset):
-            if wall in checks:
-                continue
-            return True
 
     def run(self) -> None:
         """Run the Hunt and Kill algorithm to solve the maze."""
@@ -305,5 +299,6 @@ class HuntAndKill:
                 int((self._width * self._height) * self._perfect_percent)
             ):
                 self._delete_random_walls()
+                self.avoid_3x3()
         for pos in self._forty_two_positions:
             self._maze[pos[0]][pos[1]] = "F"
