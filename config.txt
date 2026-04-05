@@ -1,0 +1,23 @@
+# Witdh of the maze
+WIDTH = 100
+
+# Height of the maze
+HEIGHT = 50
+
+# Entry point of the maze
+ENTRY = 0,0
+
+# Exit point of the maze
+EXIT = 99,49
+
+# The output of the file
+OUTPUT_FILE = maze_output.txt
+
+# True or False for perfect maze
+PERFECT = 0
+
+# Seed of the first maze
+SEED = 42
+
+# Animation of the maze
+ANIMATION = 1
