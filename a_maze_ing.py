@@ -1,8 +1,7 @@
 import random
-import re
 import sys
-from time import sleep
 from typing import Any
+from multiprocessing import Process
 
 import mlx
 
@@ -46,7 +45,7 @@ class Main:
 
         self.mlx_ptr: Any = self.m.mlx_init()
         self.width, self.height = self.get_window_size()
-        self.win_mlx: Any = self.m.mlx_new_window(
+        self.win_ptr: Any = self.m.mlx_new_window(
             self.mlx_ptr, self.width, self.height, "A-Maze-Ing!"
         )
 
@@ -62,13 +61,16 @@ class Main:
 
     def show_help(self) -> None:
         print("=== Welcome to the world of maze ===")
-        print("Instruction:")
+        print("------------------------------------")
+        print("       <<<  Instruction: >>>")
+        print("------------------------------------")
         print("S - Show/Hide path")
         print("G - Generate new maze")
         print("O - Write the output in a file")
         print("C - Change the color of the maze")
         print("A - Toggle animation")
         print("P - Compare DFS vs A* paths")
+        print("------------------------------------\n")
 
     def draw(
         self, nbr_str: str, pos: tuple[int, int], color: int = rgba(255, 255, 255)
@@ -87,13 +89,13 @@ class Main:
                 if i == 0:  # North
                     for x in range(pos[0], pos[0] + self.cell_size):
                         self.m.mlx_pixel_put(
-                            self.mlx_ptr, self.win_mlx, x, pos[1], color
+                            self.mlx_ptr, self.win_ptr, x, pos[1], color
                         )
                 if i == 1:  # East
                     for y in range(pos[1], pos[1] + self.cell_size):
                         self.m.mlx_pixel_put(
                             self.mlx_ptr,
-                            self.win_mlx,
+                            self.win_ptr,
                             pos[0] + self.cell_size,
                             y,
                             color,
@@ -102,7 +104,7 @@ class Main:
                     for x in range(pos[0], pos[0] + self.cell_size):
                         self.m.mlx_pixel_put(
                             self.mlx_ptr,
-                            self.win_mlx,
+                            self.win_ptr,
                             x,
                             pos[1] + self.cell_size,
                             color,
@@ -110,7 +112,7 @@ class Main:
                 if i == 3:  # West
                     for y in range(pos[1], pos[1] + self.cell_size):
                         self.m.mlx_pixel_put(
-                            self.mlx_ptr, self.win_mlx, pos[0], y, color
+                            self.mlx_ptr, self.win_ptr, pos[0], y, color
                         )
             i += 1
 
@@ -120,10 +122,15 @@ class Main:
         Returns:
             dict: the dictionnary that contains every settings
         """
-        if len(sys.argv) != 2:
+        if len(sys.argv) < 2:
             print("Error: Missing config file argument.")
             print("Usage: python a_maze_ing.py <config_file>")
             sys.exit(1)
+        elif len(sys.argv) > 2:
+            print("Error: To much arguments.")
+            print("Usage: python a_maze_ing.py <config_file>")
+            sys.exit(1)
+
         else:
             self.show_help()
             return load_config(sys.argv[1])
@@ -239,12 +246,12 @@ class Main:
             y_min, y_max = sorted((y1, y2))
             for x in range(x1 - half, x1 + half + 1):
                 for y in range(y_min, y_max + 1):
-                    self.m.mlx_pixel_put(self.mlx_ptr, self.win_mlx, x, y, color)
+                    self.m.mlx_pixel_put(self.mlx_ptr, self.win_ptr, x, y, color)
         elif y1 == y2:
             x_min, x_max = sorted((x1, x2))
             for x in range(x_min, x_max + 1):
                 for y in range(y1 - half, y1 + half + 1):
-                    self.m.mlx_pixel_put(self.mlx_ptr, self.win_mlx, x, y, color)
+                    self.m.mlx_pixel_put(self.mlx_ptr, self.win_ptr, x, y, color)
 
     def color_cell(self, pos: tuple[int, int], color: int) -> None:
         for x in range(
@@ -255,7 +262,7 @@ class Main:
                 pos[1] + 2,
                 pos[1] + self.cell_size - 2,
             ):
-                self.m.mlx_pixel_put(self.mlx_ptr, self.win_mlx, x, y, color)
+                self.m.mlx_pixel_put(self.mlx_ptr, self.win_ptr, x, y, color)
 
     def get_maze_output(self, file_path: str | None = None) -> None:
         maze = ""
@@ -282,14 +289,14 @@ class Main:
         self.maze = self.maze_generator.generate_maze()
         self.maze_solver.set_new_maze(self.maze)
         self.maze_solver.set_new_maze(self.maze)
-        self.m.mlx_clear_window(self.mlx_ptr, self.win_mlx)
+        self.m.mlx_clear_window(self.mlx_ptr, self.win_ptr)
         self.draw_cells(self.maze, self.color_choice[0])
         if self.showed_path:
             path = self.maze_solver.solve_as_string()
             self.show_path(path, self.color_choice[2])
 
     def hide_path(self) -> None:
-        self.m.mlx_clear_window(self.mlx_ptr, self.win_mlx)
+        self.m.mlx_clear_window(self.mlx_ptr, self.win_ptr)
         self.draw_cells(self.maze, self.color_choice[0])
 
     def give_output_file(self) -> None:
@@ -302,7 +309,7 @@ class Main:
         self.color_choice = random.choice(self.color_choices)
         self.color_choices.remove(self.color_choice)
 
-        self.m.mlx_clear_window(self.mlx_ptr, self.win_mlx)
+        self.m.mlx_clear_window(self.mlx_ptr, self.win_ptr)
         self.draw_cells(self.maze, self.color_choice[0])
 
         if self.showed_path:
@@ -328,7 +335,7 @@ class Main:
             else:
                 self.hide_path()
                 self.showed_path = 0
-        elif keynum == 113:  # Q
+        elif keynum == 113 or keynum == 65507:  # Q
             self.exit_window(_)
         elif keynum == 111:  # O
             self.give_output_file()
@@ -337,46 +344,9 @@ class Main:
         elif keynum == 97:  # A
             self.toggle_animation()
 
+
     def set_algorithm(self) -> BaseSolver:
-        if self.config["ALGO"] == "DFS":
-            return DFSSolver(
-                self.maze,
-                (
-                    self.config["ENTRY"][1],
-                    self.config["ENTRY"][0],
-                ),  # Convert (x,y) to (row,col)
-                (
-                    self.config["EXIT"][1],
-                    self.config["EXIT"][0],
-                ),  # Convert (x,y) to (row,col)
-            )
-
-        if self.config["ALGO"] == "BFS":
-            return BFSSolver(
-                self.maze,
-                (
-                    self.config["ENTRY"][1],
-                    self.config["ENTRY"][0],
-                ),  # Convert (x,y) to (row,col)
-                (
-                    self.config["EXIT"][1],
-                    self.config["EXIT"][0],
-                ),  # Convert (x,y) to (row,col)
-            )
-
-        if self.config["ALGO"] == "AStars":
-            return AStarSolver(
-                self.maze,
-                (
-                    self.config["ENTRY"][1],
-                    self.config["ENTRY"][0],
-                ),  # Convert (x,y) to (row,col)
-                (
-                    self.config["EXIT"][1],
-                    self.config["EXIT"][0],
-                ),  # Convert (x,y) to (row,col)
-            )
-        return AStarSolver(
+        dfs = DFSSolver(
             self.maze,
             (
                 self.config["ENTRY"][1],
@@ -387,17 +357,61 @@ class Main:
                 self.config["EXIT"][0],
             ),  # Convert (x,y) to (row,col)
         )
+        bfs = BFSSolver(
+            self.maze,
+            (
+                self.config["ENTRY"][1],
+                self.config["ENTRY"][0],
+            ),  # Convert (x,y) to (row,col)
+            (
+                self.config["EXIT"][1],
+                self.config["EXIT"][0],
+            ),  # Convert (x,y) to (row,col)
+        )
+        astars = AStarSolver(
+            self.maze,
+            (
+                self.config["ENTRY"][1],
+                self.config["ENTRY"][0],
+            ),  # Convert (x,y) to (row,col)
+            (
+                self.config["EXIT"][1],
+                self.config["EXIT"][0],
+            ),  # Convert (x,y) to (row,col)
+        )
+        if self.config["ALGO"] == "Astars":
+            return astars
+        if self.config["ALGO"] == "BFS":
+            return bfs
+        if self.config["ALGO"] == "DFS":
+            return dfs
+        elif self.config["ALGO"] == "Adaptive":
+            if self.config["PERFECT"]:
+                return dfs
+            else:
+                return astars
+        else:
+            return astars
+
 
     def run(self) -> None:
         self.draw_cells(self.maze, self.color_choice[0])
-        self.m.mlx_hook(self.win_mlx, 33, 0, self.exit_window, None)
-        self.m.mlx_key_hook(self.win_mlx, self.key_pressed, None)
+        self.m.mlx_hook(self.win_ptr, 33, 0, self.exit_window, None)
+        self.m.mlx_key_hook(self.win_ptr, self.key_pressed, None)
         self.m.mlx_loop(self.mlx_ptr)
+
+def main() -> None:
+    main = Main()
+    main.run()
 
 
 if __name__ == "__main__":
+    p = Process(target=main)
+    p.start()
+
     try:
-        main = Main()
-        main.run()
+        p.join()
     except KeyboardInterrupt:
-        print("===== Bye!!!! =====")
+        print("\n=== ERROR!!! ===")
+        print("Program terminated suddently...")
+        p.terminate()

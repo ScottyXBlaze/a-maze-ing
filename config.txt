@@ -1,14 +1,14 @@
 # Witdh of the maze
-WIDTH = 50
+WIDTH = 5
 
 # Height of the maze
-HEIGHT = 20
+HEIGHT = 5
 
 # Entry point of the maze
 ENTRY = 0,0
 
 # Exit point of the maze
-EXIT = 49, 19
+EXIT = 4,4
 
 # The output of the file
 OUTPUT_FILE = maze_output.txt
@@ -24,4 +24,5 @@ ANIMATION = 1
 
 # Algorithm to solve the maze
 # There are 3 options: 'DFS', 'BFS' or 'AStars'
-ALGO = AStars
+# You can also choose Adaptive
+ALGO = BFS

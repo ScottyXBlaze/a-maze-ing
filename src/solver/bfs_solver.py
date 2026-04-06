@@ -1,6 +1,7 @@
 from .base_solver import BaseSolver
 from collections import deque
 
+
 class BFSSolver(BaseSolver):
     """The BFS algorithm is a popular algorithm that solve maze
     and give the most optimal path, even if it consume a lot of

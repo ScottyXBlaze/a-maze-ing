@@ -181,6 +181,11 @@ def validate_config(config: MazeConfig) -> None:
 
     if config["ENTRY"] == config["EXIT"]:
         raise ValueError("Invalid config: ENTRY and EXIT cannot be the same")
+
+    if config["WIDTH"] < 8 or config["HEIGHT"] < 6:
+        print("\n=== Warning!! ===")
+        print("Dimension too little to put the 42 Logo")
+
     for pos in get_forty_two_positions(config["WIDTH"], config["HEIGHT"]):
         # pos is (row, col), convert to (x, y) for comparison
         pos_xy = (pos[1], pos[0])
@@ -190,7 +195,7 @@ def validate_config(config: MazeConfig) -> None:
 {pos_xy} reserved for '42'"
             )
 
-    available_aglo = ["DFS", "BFS", "AStars"]
+    available_aglo = ["DFS", "BFS", "AStars", "Adaptive"]
     if config["ALGO"] not in available_aglo:
         raise ValueError(f"Invalid algorithm name. Use one of these: {available_aglo}")
 
@@ -215,15 +220,22 @@ def load_config(path: str) -> MazeConfig:
     config_path = Path(path)
     config: PartialMazeConfig = {}
 
-    with config_path.open("r") as file:
-        for line in file:
-            try:
-                parse_line(line, config)
-            except ValueError as e:
-                print(f"Error parsing line: {line.strip()}")
-                print(f"Reason: {e}")
-                print("Using default value...")
-                return DEFAULT_CONFIG
+    try:
+        with config_path.open("r") as file:
+            for line in file:
+                try:
+                    parse_line(line, config)
+                except ValueError as e:
+                    print(f"Error parsing line: {line.strip()}")
+                    print(f"Reason: {e}")
+                    print("Using default value...")
+                    return DEFAULT_CONFIG
+    except (FileNotFoundError, PermissionError) as e:
+        print("Error validating config:", config)
+        print(f"ERROR: {e}")
+        print("Using default value...")
+        return DEFAULT_CONFIG
+
     try:
         return check_missing(config)
     except ValueError as e:

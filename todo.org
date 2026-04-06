@@ -1,0 +1,67 @@
+#+TITLE: Project A-Maze-ing - 42 Curriculum
+#+AUTHOR: Kenny
+#+CATEGORY: 42_Project
+
+* TODO Configuration et Environnement [4/5]
+  - [X] Configurer le linter (flake8) et le checkeur de type (mypy) [cite: 73, 80, 92]
+  - [X] Installer Python 3.10 ou version ultérieure [cite: 72]
+  - [X] Configurer l'environnement virtuel (venv ou conda) [cite: 101]
+  - [ ] Initialiser le dépôt Git avec un fichier .gitignore (exclure les artefacts Python) [cite: 100, 207]
+  - [X] Créer le fichier `config.txt` par défaut avec les clés obligatoires (WIDTH, HEIGHT, ENTRY, EXIT, OUTPUT_FILE, PERFECT) [cite: 114, 121, 122, 127]
+
+
+* TODO Développement du Cœur : MazeGenerator [6/6]
+  - [X] Implémenter la classe `MazeGenerator` dans un module autonome [cite: 109, 197]
+  - [X] Algorithme de génération aléatoire (ex: Prim, Kruskal ou Recursive Backtracker) [cite: 13, 130]
+  - [X] Gérer l'option `PERFECT=True` (chemin unique entre entrée et sortie) [cite: 141]
+  - [X] Implémenter la contrainte des couloirs (pas de zone ouverte > 2x2) [cite: 138, 139]
+  - [X] Intégrer le motif "42" avec des cellules fermées (si la taille le permet) [cite: 140, 144]
+	- [X] Faire une message si le 42 ne s'affiche pas dans le window
+  - [X] Assurer la reproductibilité via un "seed" [cite: 130, 126]
+
+* TODO Gestion des Entrées/Sorties [4/4]
+  - [X] Créer le script principal `a_maze_ing.py` acceptant `config.txt` en argument [cite: 112, 113]
+  - [X] Parser le fichier de configuration (ignorer les lignes commençant par #) [cite: 119, 120]
+  - [X] Encoder le labyrinthe en hexadécimal (Bit 0:N, 1:E, 2:S, 3:W) [cite: 147, 148]
+  - [X] Générer le fichier de sortie incluant : [cite: 156, 157]
+    - [X] Le labyrinthe (ligne par ligne)
+    - [X] Coordonnées Entrée/Sortie
+    - [X] Chemin le plus court (N, E, S, W)
+
+* TODO Interface Visuelle [2/3]
+  - [X] Implémenter le rendu (soit ASCII terminal, soit graphique avec MLX) [cite: 187]
+  - [-] Ajouter les interactions utilisateur : [cite: 189, 190]
+    - [X] Re-générer un labyrinthe
+    - [ ] Afficher/Masquer le chemin de solution
+    - [X] Changer les couleurs des murs
+  - [X] S'assurer que l'entrée et la sortie sont bien visibles [cite: 188]
+
+* TODO Packaging et Réutilisabilité [0/3]
+  - [ ] Documenter l'instanciation et l'utilisation du module `mazegen-*` [cite: 198, 199, 202]
+  - [ ] Créer le package Python (.tar.gz ou .whl) à la racine du dépôt [cite: 201, 203]
+  - [ ] Tester l'installation via `pip` dans un environnement propre [cite: 205]
+
+* TODO Automatisation (Makefile) [6/6]
+  - [X] Rule `install` : Installation des dépendances via pip/uv [cite: 86]
+  - [X] Rule `run` : Exécution du script principal [cite: 87]
+  - [X] Rule `debug` : Lancement avec pdb [cite: 88]
+  - [X] Rule `clean` : Nettoyage des caches (__pycache__, mypy_cache) [cite: 89]
+  - [X] Rule `lint` : Exécution de flake8 et mypy avec les flags stricts [cite: 92, 94]
+  - [X] Rule `lint-strict` : (Optionnel) mypy --strict [cite: 95]
+
+* TODO Documentation et Finalisation [0/4]
+  - Note taken on [2026-04-06 lun. 19:12] \\
+    This will be the final part of the project
+  - [ ] Rédiger le `README.md` avec la mention obligatoire en italique (Login 42) [cite: 207, 209]
+  - [ ] Détailler les choix algorithmiques et l'usage de l'IA dans les ressources [cite: 212, 215]
+  - [ ] Vérifier la gestion des exceptions (le programme ne doit jamais crash) [cite: 74, 116]
+
+
+* TODO Error handling and last check for every code
+  - [ ] Check the maze and try every edge case with the generator
+
+
+
+* BONUS [1/2]
+  - [X] Gérer plusieurs algorithmes de génération [cite: 222]
+  - [ ] Ajouter des animations pendant la génération [cite: 222]

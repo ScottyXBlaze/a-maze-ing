@@ -6,6 +6,8 @@
 import heapq
 from typing import List, Tuple, Optional
 from .base_solver import BaseSolver
+
+
 class AStarSolver(BaseSolver):
     """A Stars algorithm is probably the most used algo to solve
     path efficiently. it gives the most optimal path without
@@ -32,7 +34,7 @@ class AStarSolver(BaseSolver):
     def solve(self) -> Optional[List[str]]:
         """This solve the entire maze, it calculate the cost of each cell
         using a formula and prioritize the cell that has the minimal cost
-        estimation to finish the maze, it can optimize the program 
+        estimation to finish the maze, it can optimize the program
         because we don't have to checks every cells but we can still
         find the most optimal path
 
@@ -62,15 +64,15 @@ class AStarSolver(BaseSolver):
         while open_set:
             # On récupère la case la plus prometteuse (plus petit score f).
             # le premier argument est l'estimation du total cost, mais on n'a
-            # pas specialement besoin voila porquoi je ne l'ai pas fait dans 
+            # pas specialement besoin voila porquoi je ne l'ai pas fait dans
             # notre code
             _, cost_so_far, current, path = heapq.heappop(open_set)
 
-            # Si notre position initiale est deja dans le liste des cellules 
+            # Si notre position initiale est deja dans le liste des cellules
             # visiter, on ne fait rien et continue de prendre les autres cellules
             if current in visited:
                 continue
-            # Si ce n'est pas visitee on continue le code ajoute le position 
+            # Si ce n'est pas visitee on continue le code ajoute le position
             # avec les les cases visitee
             visited.add(current)
 
@@ -114,4 +116,4 @@ class AStarSolver(BaseSolver):
         path = self.solve()
         if path is None:
             return ""
-        return ''.join(path)
+        return "".join(path)

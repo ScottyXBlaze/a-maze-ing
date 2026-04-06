@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from .base_solver import BaseSolver
 
 
@@ -36,7 +36,7 @@ class DFSSolver(BaseSolver):
         # STACK pour DFS (Last In First Out)
         # Chaque élément contient : (position actuelle, chemin accumulé)
         stack = [(self.starting, [])]
-        
+
         # Ensemble des cases déjà visitées
         visited = {self.starting}
 
@@ -72,4 +72,4 @@ class DFSSolver(BaseSolver):
         path = self.solve()
         if path is None:
             return ""
-        return ''.join(path)
+        return "".join(path)
