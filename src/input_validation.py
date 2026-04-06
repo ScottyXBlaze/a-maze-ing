@@ -9,7 +9,8 @@ REQUIRED_KEYS = {
     "OUTPUT_FILE",
     "PERFECT",
     "SEED",
-    "ANIMATION"
+    "ANIMATION",
+    "ALGO",
 }
 
 
@@ -19,6 +20,7 @@ class MazeConfig(TypedDict):
     Args:
         TypedDict (class): Base class for hinting with dict
     """
+
     WIDTH: int
     HEIGHT: int
     ENTRY: tuple[int, int]
@@ -27,6 +29,7 @@ class MazeConfig(TypedDict):
     PERFECT: bool
     SEED: int
     ANIMATION: bool
+    ALGO: str
 
 
 class PartialMazeConfig(TypedDict, total=False):
@@ -38,6 +41,7 @@ class PartialMazeConfig(TypedDict, total=False):
     PERFECT: bool
     SEED: int
     ANIMATION: bool
+    ALGO: str
 
 
 DEFAULT_CONFIG: MazeConfig = {
@@ -48,7 +52,8 @@ DEFAULT_CONFIG: MazeConfig = {
     "OUTPUT_FILE": "maze_output.txt",
     "PERFECT": True,
     "SEED": 42,
-    "ANIMATION": True
+    "ANIMATION": True,
+    "ALGO": "DFS",
 }
 
 
@@ -92,10 +97,7 @@ def parse_point(value: str) -> tuple[int, int]:
     return int(x_str.strip()), int(y_str.strip())
 
 
-def parse_line(
-        line: str,
-        config: PartialMazeConfig
-        ) -> None:
+def parse_line(line: str, config: PartialMazeConfig) -> None:
     """Take all the string to convert them into key/value with a dictionnary
 
     Args:
@@ -132,13 +134,13 @@ def parse_line(
         config["PERFECT"] = parse_bool(raw_value)
     elif key == "ANIMATION":
         config["ANIMATION"] = parse_bool(raw_value)
+    elif key == "ALGO":
+        config["ALGO"] = raw_value
     else:
         raise ValueError(f"Unrecognized config key: {key}")
 
 
-def get_forty_two_positions(
-        width: int, height: int
-        ) -> tuple[tuple[int, int], ...]:
+def get_forty_two_positions(width: int, height: int) -> tuple[tuple[int, int], ...]:
     center_y = width // 2
     center_x = height // 2
     positions: list[tuple[int, int]] = []
@@ -164,9 +166,8 @@ def validate_config(config: MazeConfig) -> None:
     if not (0 < config["WIDTH"] <= 100):
         raise ValueError(f"Invalid config value for WIDTH: {config['WIDTH']}")
     if not (0 < config["HEIGHT"] <= 50):
-        raise ValueError(
-            f"Invalid config value for HEIGHT: {config['HEIGHT']}"
-            )
+        raise ValueError(f"Invalid config value for HEIGHT: {config['HEIGHT']}")
+
     if not (
         0 <= config["ENTRY"][0] < config["WIDTH"]
         and 0 <= config["ENTRY"][1] < config["HEIGHT"]
@@ -177,6 +178,7 @@ def validate_config(config: MazeConfig) -> None:
         and 0 <= config["EXIT"][1] < config["HEIGHT"]
     ):
         raise ValueError(f"Invalid config value for EXIT: {config['EXIT']}")
+
     if config["ENTRY"] == config["EXIT"]:
         raise ValueError("Invalid config: ENTRY and EXIT cannot be the same")
     for pos in get_forty_two_positions(config["WIDTH"], config["HEIGHT"]):
@@ -187,6 +189,10 @@ def validate_config(config: MazeConfig) -> None:
                 f"Invalid config: ENTRY and EXIT cannot be at position \
 {pos_xy} reserved for '42'"
             )
+
+    available_aglo = ["DFS", "BFS", "AStars"]
+    if config["ALGO"] not in available_aglo:
+        raise ValueError(f"Invalid algorithm name. Use one of these: {available_aglo}")
 
 
 def is_complete_config(config: PartialMazeConfig) -> TypeGuard[MazeConfig]:

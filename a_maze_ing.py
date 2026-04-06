@@ -1,13 +1,15 @@
 import random
+import re
 import sys
-from typing import Any
 from time import sleep
+from typing import Any
 
 import mlx
 
 from mazegen import MazeGenerator
+from src import AStarSolver, BFSSolver, DFSSolver
 from src.input_validation import MazeConfig, load_config
-from src.mazesolver import DFSSolver
+from src.solver.base_solver import BaseSolver
 
 
 def rgba(r: int, g: int, b: int, a: int = 255) -> int:
@@ -24,13 +26,8 @@ class Main:
 
         self.cell_size = 19
 
-        self.color_choices = [
-            (rgba(236, 102, 102), rgba(137, 169, 238), rgba(255, 255, 255)),
-            (rgba(255, 111, 105), rgba(222, 248, 255), rgba(127, 229, 186)),
-            (rgba(44, 43, 72), rgba(25, 41, 156), rgba(32, 43, 122)),
-            (rgba(107, 170, 117), rgba(203, 255, 77), rgba(179, 57, 81)),
-            (rgba(222, 165, 197), rgba(241, 136, 140), rgba(249, 209, 220)),
-        ]
+        self.color_choices = self.get_colors()
+
         self.color_choice = random.choice(self.color_choices)
 
         self.showed_path = 0
@@ -45,17 +42,7 @@ class Main:
             seed=self.config["SEED"]
         )
 
-        self.maze_solver = DFSSolver(
-            self.maze,
-            (
-                self.config["ENTRY"][1],
-                self.config["ENTRY"][0],
-            ),  # Convert (x,y) to (row,col)
-            (
-                self.config["EXIT"][1],
-                self.config["EXIT"][0],
-            ),  # Convert (x,y) to (row,col)
-        )
+        self.maze_solver: BaseSolver = self.set_algorithm()
 
         self.mlx_ptr: Any = self.m.mlx_init()
         self.width, self.height = self.get_window_size()
@@ -81,12 +68,10 @@ class Main:
         print("O - Write the output in a file")
         print("C - Change the color of the maze")
         print("A - Toggle animation")
+        print("P - Compare DFS vs A* paths")
 
     def draw(
-        self,
-        nbr_str: str,
-        pos: tuple[int, int],
-        color: int = rgba(255, 255, 255)
+        self, nbr_str: str, pos: tuple[int, int], color: int = rgba(255, 255, 255)
     ) -> None:
         """Draw a cell on the window
 
@@ -180,7 +165,7 @@ class Main:
             rgba(255, 0, 255),
         )
 
-    def draw_path(self, path: str, color: int) -> None:
+    def draw_path(self, path: str, color: int, animated: bool) -> None:
         """Draw the path on the window
 
         Args:
@@ -192,9 +177,7 @@ class Main:
         line_thickness: int = 2
 
         start_center: tuple[int, int] = self.cell_center((x, y))
-        self.draw_thick_segment(
-            start_center, start_center, path_color, line_thickness
-        )
+        self.draw_thick_segment(start_center, start_center, path_color, line_thickness)
 
         for direction in path:
             old_pos: tuple[int, int] = (x, y)
@@ -214,17 +197,14 @@ class Main:
                 path_color,
                 line_thickness,
             )
+            if animated:
+                self.m.mlx_do_sync(self.mlx_ptr)
 
     def show_path(self, path: str, color: int) -> None:
         if self.config["ANIMATION"]:
-            tmp_path: str = ""
-            for dir in path:
-                tmp_path += dir
-                self.draw_path(tmp_path, color)
-                self.m.mlx_do_sync(self.mlx_ptr)
-                sleep(0.05)
+            self.draw_path(path, color, True)
         else:
-            self.draw_path(path, color)
+            self.draw_path(path, color, False)
 
     def cell_center(self, pos: tuple[int, int]) -> tuple[int, int]:
         """Calculate the center of the maze
@@ -250,11 +230,7 @@ class Main:
         ]
 
     def draw_thick_segment(
-        self,
-        start: tuple[int, int],
-        end: tuple[int, int],
-        color: int,
-        thickness: int
+        self, start: tuple[int, int], end: tuple[int, int], color: int, thickness: int
     ) -> None:
         x1, y1 = start
         x2, y2 = end
@@ -263,16 +239,12 @@ class Main:
             y_min, y_max = sorted((y1, y2))
             for x in range(x1 - half, x1 + half + 1):
                 for y in range(y_min, y_max + 1):
-                    self.m.mlx_pixel_put(
-                        self.mlx_ptr, self.win_mlx, x, y, color
-                    )
+                    self.m.mlx_pixel_put(self.mlx_ptr, self.win_mlx, x, y, color)
         elif y1 == y2:
             x_min, x_max = sorted((x1, x2))
             for x in range(x_min, x_max + 1):
                 for y in range(y1 - half, y1 + half + 1):
-                    self.m.mlx_pixel_put(
-                        self.mlx_ptr, self.win_mlx, x, y, color
-                    )
+                    self.m.mlx_pixel_put(self.mlx_ptr, self.win_mlx, x, y, color)
 
     def color_cell(self, pos: tuple[int, int], color: int) -> None:
         for x in range(
@@ -292,9 +264,7 @@ class Main:
             for cell in row:
                 maze += cell
             maze += "\n"
-        entry = (
-            str(self.config["ENTRY"][0]) + "," + str(self.config["ENTRY"][1])
-        )
+        entry = str(self.config["ENTRY"][0]) + "," + str(self.config["ENTRY"][1])
         exit = str(self.config["EXIT"][0]) + "," + str(self.config["EXIT"][1])
         with open(file_path or "maze.txt", "w") as f:
             f.write(maze)
@@ -310,6 +280,7 @@ class Main:
 
     def new_maze(self, _: object) -> None:
         self.maze = self.maze_generator.generate_maze()
+        self.maze_solver.set_new_maze(self.maze)
         self.maze_solver.set_new_maze(self.maze)
         self.m.mlx_clear_window(self.mlx_ptr, self.win_mlx)
         self.draw_cells(self.maze, self.color_choice[0])
@@ -336,7 +307,7 @@ class Main:
 
         if self.showed_path:
             path = self.maze_solver.solve_as_string()
-            self.show_path(path, self.color_choice[2])
+            self.draw_path(path, self.color_choice[2], False)
 
     def toggle_animation(self) -> None:
         if self.config["ANIMATION"]:
@@ -351,7 +322,7 @@ class Main:
             self.new_maze(_)
         elif keynum == 115:  # S
             if not self.showed_path:
-                path = self.maze_solver.solve_as_string()
+                path: str = self.maze_solver.solve_as_string()
                 self.show_path(path, self.color_choice[2])
                 self.showed_path = 1
             else:
@@ -363,8 +334,59 @@ class Main:
             self.give_output_file()
         elif keynum == 99:  # C
             self.change_color()
-        elif keynum == 97:
+        elif keynum == 97:  # A
             self.toggle_animation()
+
+    def set_algorithm(self) -> BaseSolver:
+        if self.config["ALGO"] == "DFS":
+            return DFSSolver(
+                self.maze,
+                (
+                    self.config["ENTRY"][1],
+                    self.config["ENTRY"][0],
+                ),  # Convert (x,y) to (row,col)
+                (
+                    self.config["EXIT"][1],
+                    self.config["EXIT"][0],
+                ),  # Convert (x,y) to (row,col)
+            )
+
+        if self.config["ALGO"] == "BFS":
+            return BFSSolver(
+                self.maze,
+                (
+                    self.config["ENTRY"][1],
+                    self.config["ENTRY"][0],
+                ),  # Convert (x,y) to (row,col)
+                (
+                    self.config["EXIT"][1],
+                    self.config["EXIT"][0],
+                ),  # Convert (x,y) to (row,col)
+            )
+
+        if self.config["ALGO"] == "AStars":
+            return AStarSolver(
+                self.maze,
+                (
+                    self.config["ENTRY"][1],
+                    self.config["ENTRY"][0],
+                ),  # Convert (x,y) to (row,col)
+                (
+                    self.config["EXIT"][1],
+                    self.config["EXIT"][0],
+                ),  # Convert (x,y) to (row,col)
+            )
+        return AStarSolver(
+            self.maze,
+            (
+                self.config["ENTRY"][1],
+                self.config["ENTRY"][0],
+            ),  # Convert (x,y) to (row,col)
+            (
+                self.config["EXIT"][1],
+                self.config["EXIT"][0],
+            ),  # Convert (x,y) to (row,col)
+        )
 
     def run(self) -> None:
         self.draw_cells(self.maze, self.color_choice[0])

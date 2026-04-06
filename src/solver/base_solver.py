@@ -1,4 +1,5 @@
-class BaseSolver:
+from abc import abstractmethod, ABC
+class BaseSolver(ABC):
     """Contains all the base function and variable for a maze solver"""
 
     def __init__(
@@ -82,3 +83,7 @@ class BaseSolver:
         self.maze = maze
         self.height = len(maze)
         self.width = len(maze[0]) if maze else 0
+
+    @abstractmethod
+    def solve_as_string(self) -> str:
+        pass
