@@ -92,5 +92,5 @@ class BaseSolver(ABC):
 
 
     @abstractmethod
-    def solve(self) -> list[str]:
+    def solve(self) -> list[str] | None:
         return ['']
