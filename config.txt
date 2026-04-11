@@ -1,28 +1,34 @@
-# Witdh of the maze
-WIDTH = 5
+# Width of the maze
+# Valid: 0 to 100
+WIDTH = 100
 
 # Height of the maze
-HEIGHT = 5
+# Valid: 0 to 50
+HEIGHT = 50
 
 # Entry point of the maze
+# Valid: (x,y) or just x,y
 ENTRY = 0,0
 
 # Exit point of the maze
-EXIT = 4,4
+# Valid: (x,y) or just x,y
+EXIT = 99,49
 
 # The output of the file
 OUTPUT_FILE = maze_output.txt
 
 # True or False for perfect maze
+# Valid: 0/1 or True/False or yes/no or y/n
 PERFECT = 0
 
 # Seed of the first maze
+# Just an integer value (0 to make it random)
 SEED = 42
 
 # Animation of the maze
+# Valid: 0/1 or True/False or yes/no or y/n
 ANIMATION = 1
 
-# Algorithm to solve the maze
-# There are 3 options: 'DFS', 'BFS' or 'AStars'
-# You can also choose Adaptive
+# Algorithm to generate the maze
+# Valid: 'DFS', 'BFS', 'ASTAR' or 'AUTO'
 ALGO = BFS

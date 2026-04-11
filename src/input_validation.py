@@ -1,245 +1,269 @@
 from pathlib import Path
 from typing import TypedDict, TypeGuard
-
-REQUIRED_KEYS = {
-    "WIDTH",
-    "HEIGHT",
-    "ENTRY",
-    "EXIT",
-    "OUTPUT_FILE",
-    "PERFECT",
-    "SEED",
-    "ANIMATION",
-    "ALGO",
-}
+from .parsers import Parser
 
 
-class MazeConfig(TypedDict):
-    """General config type hint
-
-    Args:
-        TypedDict (class): Base class for hinting with dict
-    """
-
-    WIDTH: int
-    HEIGHT: int
-    ENTRY: tuple[int, int]
-    EXIT: tuple[int, int]
-    OUTPUT_FILE: str
-    PERFECT: bool
-    SEED: int
-    ANIMATION: bool
-    ALGO: str
-
-
-class PartialMazeConfig(TypedDict, total=False):
-    WIDTH: int
-    HEIGHT: int
-    ENTRY: tuple[int, int]
-    EXIT: tuple[int, int]
-    OUTPUT_FILE: str
-    PERFECT: bool
-    SEED: int
-    ANIMATION: bool
-    ALGO: str
-
-
-DEFAULT_CONFIG: MazeConfig = {
-    "WIDTH": 20,
-    "HEIGHT": 20,
-    "ENTRY": (0, 0),
-    "EXIT": (19, 19),
-    "OUTPUT_FILE": "maze_output.txt",
-    "PERFECT": True,
-    "SEED": 42,
-    "ANIMATION": True,
-    "ALGO": "DFS",
-}
-
-
-def parse_bool(value: str) -> bool:
-    """Translate a string into a boolean
-
-    Args:
-        value (str): string like TRUE, 1, YES, Y
+class InputParser:
+    """Basic Input parsers for the maze generator, it is used to parse the
+    config file and check if all the config are valid, it also contains
+    some useful function to check edge cases and to get the position of the
+    '42' pattern in the maze
 
     Raises:
-        ValueError: if the string cannot be translated into a boolean
-
-    Returns:
-        bool: the translated value of the string
+        ValueError: If the config file is invalid or if there is a missing key
     """
-    lowered = value.strip().lower()
-    if lowered in {"true", "1", "yes", "y"}:
-        return True
-    if lowered in {"false", "0", "no", "n"}:
-        return False
-    raise ValueError(f"Invalid boolean value: {value}")
+    class PartialMazeConfig(TypedDict, total=False):
+        """Partial config type hint, used during parsing"""
+        WIDTH: int
+        HEIGHT: int
+        ENTRY: tuple[int, int]
+        EXIT: tuple[int, int]
+        OUTPUT_FILE: str
+        PERFECT: bool
+        SEED: int
+        ANIMATION: bool
+        ALGO: str
 
+    class MazeConfig(TypedDict):
+        """General config type hint
 
-def parse_point(value: str) -> tuple[int, int]:
-    """Take a tuple like string and return its casted value into tuple
+        Args:
+            TypedDict (class): Base class for hinting with dict
+        """
 
-    Args:
-        value (str): the tuple in string we want to convert
+        WIDTH: int
+        HEIGHT: int
+        ENTRY: tuple[int, int]
+        EXIT: tuple[int, int]
+        OUTPUT_FILE: str
+        PERFECT: bool
+        SEED: int
+        ANIMATION: bool
+        ALGO: str
 
-    Raises:
-        ValueError: if the format is not like (x, y)
+    def __init__(self) -> None:
+        """Everything start here
+        """
 
-    Returns:
-        tuple[int, int]: the tuple in (x, y) form
-    """
-    cleaned = value.strip()
-    if not (cleaned.startswith("(") and cleaned.endswith(")")):
-        x_str, y_str = cleaned.split(",")
-    else:
-        x_str, y_str = cleaned[1:-1:1].split(",")
-    return int(x_str.strip()), int(y_str.strip())
+        self.parsers = Parser()
 
+        self.required_keys = {
+            "WIDTH",
+            "HEIGHT",
+            "ENTRY",
+            "EXIT",
+            "OUTPUT_FILE",
+            "PERFECT",
+            "SEED",
+            "ANIMATION",
+            "ALGO",
+        }
 
-def parse_line(line: str, config: PartialMazeConfig) -> None:
-    """Take all the string to convert them into key/value with a dictionnary
+        self.default_config: InputParser.MazeConfig = {
+            "WIDTH": 20,
+            "HEIGHT": 20,
+            "ENTRY": (0, 0),
+            "EXIT": (19, 19),
+            "OUTPUT_FILE": "maze_output.txt",
+            "PERFECT": True,
+            "SEED": 42,
+            "ANIMATION": True,
+            "ALGO": "AUTO",
+        }
 
-    Args:
-        line (str): the string we want to convert
-        config (MazeConfig): the dictionary we want to put the config
+    def set_algo(self, algo_name: str) -> None:
+        """Set the algorithm to use for solving the maze"""
+        if algo_name.upper() in {"DFS", "BFS", "ASTAR", "AUTO"}:
+            self.default_config["ALGO"] = algo_name.upper()
 
-    Raises:
-        ValueError: if the format is invalid (no '=')
-        ValueError: if the key is unrecognized
-    """
-    stripped = line.strip()
+    def parse_line(self, line: str, config: PartialMazeConfig) -> None:
+        """Check each line and convert them with the available parsers
 
-    if not stripped or stripped.startswith("#"):
-        return
+        Args:
+            line (str): The line of the key-value to parse
+            config (PartialMazeConfig): the config class
 
-    if "=" not in stripped:
-        raise ValueError(f"Invalid config line (missing '='): {stripped}")
+        Raises:
+            ValueError: If there is not '=' in the line
+            ValueError: if the key is unrecognized
+        """
+        stripped = line.strip()
 
-    key, raw_value = (part.strip() for part in stripped.split("=", 1))
+        if not stripped or stripped.startswith("#"):
+            return
 
-    if key == "WIDTH":
-        config["WIDTH"] = int(raw_value)
-    elif key == "HEIGHT":
-        config["HEIGHT"] = int(raw_value)
-    elif key == "SEED":
-        config["SEED"] = int(raw_value)
-    elif key == "ENTRY":
-        config["ENTRY"] = parse_point(raw_value)
-    elif key == "EXIT":
-        config["EXIT"] = parse_point(raw_value)
-    elif key == "OUTPUT_FILE":
-        config["OUTPUT_FILE"] = raw_value
-    elif key == "PERFECT":
-        config["PERFECT"] = parse_bool(raw_value)
-    elif key == "ANIMATION":
-        config["ANIMATION"] = parse_bool(raw_value)
-    elif key == "ALGO":
-        config["ALGO"] = raw_value
-    else:
-        raise ValueError(f"Unrecognized config key: {key}")
+        if "=" not in stripped:
+            raise ValueError(f"Invalid config line (missing '='): {stripped}")
 
+        key, raw_value = (part.strip() for part in stripped.split("=", 1))
 
-def get_forty_two_positions(width: int, height: int) -> tuple[tuple[int, int], ...]:
-    center_y = width // 2
-    center_x = height // 2
-    positions: list[tuple[int, int]] = []
-    if width <= 8 or height <= 6:
-        return tuple(positions)
-    for i in range(3, 0, -1):
-        positions.extend(
-            [
-                (center_x - i + 1, center_y - 3),
-                (center_x - i + 1, center_y + 3),
-                (center_x + i - 1, center_y - 1),
-                (center_x + i - 1, center_y + 1),
-                (center_x, center_y - i),
-                (center_x, center_y + i),
-                (center_x + 2, center_y + i),
-                (center_x - 2, center_y + i),
-            ]
-        )
-    return tuple(positions)
+        if key == "WIDTH":
+            config["WIDTH"] = int(raw_value)
+        elif key == "HEIGHT":
+            config["HEIGHT"] = int(raw_value)
+        elif key == "SEED":
+            config["SEED"] = int(raw_value)
+        elif key == "ENTRY":
+            config["ENTRY"] = self.parsers.parse_point(raw_value)
+        elif key == "EXIT":
+            config["EXIT"] = self.parsers.parse_point(raw_value)
+        elif key == "OUTPUT_FILE":
+            config["OUTPUT_FILE"] = raw_value
+        elif key == "PERFECT":
+            config["PERFECT"] = self.parsers.parse_bool(raw_value)
+        elif key == "ANIMATION":
+            config["ANIMATION"] = self.parsers.parse_bool(raw_value)
+        elif key == "ALGO":
+            config["ALGO"] = raw_value.upper()
+        else:
+            raise ValueError(f"Unrecognized config key: {key}")
 
+    def get_forty_two_positions(
+        self, width: int, height: int
+    ) -> tuple[tuple[int, int], ...]:
+        """Get all the position of the 42 logo in the maze if there is one
 
-def validate_config(config: MazeConfig) -> None:
-    if not (0 < config["WIDTH"] <= 100):
-        raise ValueError(f"Invalid config value for WIDTH: {config['WIDTH']}")
-    if not (0 < config["HEIGHT"] <= 50):
-        raise ValueError(f"Invalid config value for HEIGHT: {config['HEIGHT']}")
+        Args:
+            width (int): the width of the maze
+            height (int): the height of the maze
 
-    if not (
-        0 <= config["ENTRY"][0] < config["WIDTH"]
-        and 0 <= config["ENTRY"][1] < config["HEIGHT"]
-    ):
-        raise ValueError(f"Invalid config value for ENTRY: {config['ENTRY']}")
-    if not (
-        0 <= config["EXIT"][0] < config["WIDTH"]
-        and 0 <= config["EXIT"][1] < config["HEIGHT"]
-    ):
-        raise ValueError(f"Invalid config value for EXIT: {config['EXIT']}")
-
-    if config["ENTRY"] == config["EXIT"]:
-        raise ValueError("Invalid config: ENTRY and EXIT cannot be the same")
-
-    if config["WIDTH"] < 8 or config["HEIGHT"] < 6:
-        print("\n=== Warning!! ===")
-        print("Dimension too little to put the 42 Logo")
-
-    for pos in get_forty_two_positions(config["WIDTH"], config["HEIGHT"]):
-        # pos is (row, col), convert to (x, y) for comparison
-        pos_xy = (pos[1], pos[0])
-        if pos_xy == config["ENTRY"] or pos_xy == config["EXIT"]:
-            raise ValueError(
-                f"Invalid config: ENTRY and EXIT cannot be at position \
-{pos_xy} reserved for '42'"
+        Returns:
+            tuple[tuple[int, int], ...]: The list of the position of the 42
+            logo in the maze, empty if there is no 42 logo
+        """
+        center_y = width // 2
+        center_x = height // 2
+        positions: set[tuple[int, int]] = set()
+        if width <= 8 or height <= 6:
+            return tuple(positions)
+        for i in range(3, 0, -1):
+            positions.update(
+                [
+                    (center_x - i + 1, center_y - 3),
+                    (center_x - i + 1, center_y + 3),
+                    (center_x + i - 1, center_y - 1),
+                    (center_x + i - 1, center_y + 1),
+                    (center_x, center_y - i),
+                    (center_x, center_y + i),
+                    (center_x + 2, center_y + i),
+                    (center_x - 2, center_y + i),
+                ]
             )
+        return tuple(positions)
 
-    available_aglo = ["DFS", "BFS", "AStars", "Adaptive"]
-    if config["ALGO"] not in available_aglo:
-        raise ValueError(f"Invalid algorithm name. Use one of these: {available_aglo}")
+    def validate_config(self, config: MazeConfig) -> None:
+        """Validate every settings in the config
 
+        Args:
+            config (MazeConfig): The dict that has all the settings
 
-def is_complete_config(config: PartialMazeConfig) -> TypeGuard[MazeConfig]:
-    return all(key in config for key in REQUIRED_KEYS)
+        Raises:
+            ValueError: If any of the settings is invalid
+        """
+        if not (0 < config["WIDTH"] <= 100):
+            raise ValueError(
+                f"Invalid config value for WIDTH: {config['WIDTH']}"
+                )
+        if not (0 < config["HEIGHT"] <= 50):
+            raise ValueError(
+                f"Invalid config value for HEIGHT: {config['HEIGHT']}"
+                )
+        if not (
+            0 <= config["ENTRY"][0] < config["WIDTH"]
+            and 0 <= config["ENTRY"][1] < config["HEIGHT"]
+        ):
+            raise ValueError(
+                f"Invalid config value for ENTRY: {config['ENTRY']}"
+                )
+        if not (
+            0 <= config["EXIT"][0] < config["WIDTH"]
+            and 0 <= config["EXIT"][1] < config["HEIGHT"]
+        ):
+            raise ValueError(
+                f"Invalid config value for EXIT: {config['EXIT']}"
+                )
+        if config["ENTRY"] == config["EXIT"]:
+            raise ValueError(
+                "Invalid config: ENTRY and EXIT cannot be the same"
+                )
 
+        if config["WIDTH"] <= 8 or config["HEIGHT"] <= 6:
+            print("=== WARNING! ===")
+            print(
+                "The maze is too small to include the '42' pattern.",
+                "ENTRY and EXIT can be anywhere."
+                )
+        for pos in self.get_forty_two_positions(
+                config["WIDTH"], config["HEIGHT"]):
+            pos_xy = (pos[1], pos[0])
+            if pos_xy == config["ENTRY"] or pos_xy == config["EXIT"]:
+                raise ValueError(
+                    f"Invalid config: ENTRY and EXIT cannot be at position \
+    {pos_xy} reserved for '42'"
+                )
 
-def check_missing(config: PartialMazeConfig) -> MazeConfig:
-    missing = REQUIRED_KEYS - set(config)
-    if missing:
-        missing_keys = ", ".join(sorted(missing))
-        raise ValueError(f"Missing required config keys: {missing_keys}")
-    if not is_complete_config(config):
-        # Defensive guard for static typing.
-        raise ValueError("Invalid config structure")
-    validate_config(config)
-    return config
+    def is_complete_config(
+            self, config: PartialMazeConfig
+            ) -> TypeGuard[MazeConfig]:
+        """Check if every config is in the dictionnary
 
+        Args:
+            config (PartialMazeConfig): The dictionnary of the config
 
-def load_config(path: str) -> MazeConfig:
-    config_path = Path(path)
-    config: PartialMazeConfig = {}
+        Returns:
+            TypeGuard[MazeConfig]: boolean that indicate if the config is
+              complete or not
+        """
+        return all(key in config for key in self.required_keys)
 
-    try:
+    def check_missing(self, config: PartialMazeConfig) -> MazeConfig:
+        """Check if all the config are in the dictionnary
+
+        Args:
+            config (PartialMazeConfig): The dictionnary of the config
+
+        Raises:
+            ValueError: If any required config key is missing
+            ValueError: If the config structure is invalid
+
+        Returns:
+            MazeConfig: The complete maze configuration
+        """
+        missing = self.required_keys - set(config)
+        if missing:
+            missing_keys = ", ".join(sorted(missing))
+            raise ValueError(f"Missing required config keys: {missing_keys}")
+        if not self.is_complete_config(config):
+            raise ValueError("Invalid config structure")
+        self.validate_config(config)
+        return config
+
+    def load_config(self, path: str) -> MazeConfig:
+        """Load the configuration in the path
+
+        Args:
+            path (str): The path of the file we want to load the config from
+
+        Returns:
+            MazeConfig: The complete maze configuration, set as default
+              if there is an error
+        """
+        config_path = Path(path)
+        config: InputParser.PartialMazeConfig = {}
+
         with config_path.open("r") as file:
             for line in file:
                 try:
-                    parse_line(line, config)
+                    self.parse_line(line, config)
                 except ValueError as e:
                     print(f"Error parsing line: {line.strip()}")
                     print(f"Reason: {e}")
                     print("Using default value...")
-                    return DEFAULT_CONFIG
-    except (FileNotFoundError, PermissionError) as e:
-        print("Error validating config:", config)
-        print(f"ERROR: {e}")
-        print("Using default value...")
-        return DEFAULT_CONFIG
-
-    try:
-        return check_missing(config)
-    except ValueError as e:
-        print("Error validating config:", config)
-        print(f"ERROR: {e}")
-        print("Using default value...")
-        return DEFAULT_CONFIG
+                    return self.default_config
+        try:
+            return self.check_missing(config)
+        except ValueError as e:
+            print("Error validating config:", config)
+            print(f"ERROR: {e}")
+            print("Using default value...")
+            return self.default_config

@@ -1,3 +1,7 @@
-from .solver import BaseSolver, BFSSolver, AStarSolver, DFSSolver
 """Source package for a-maze-ing."""
-__all__ = ["BaseSolver", "BFSSolver", "AStarSolver", "DFSSolver"]
+from .input_validation import InputParser
+from .solver import DFSSolver, BFSSolver, AStarSolver, BaseSolver
+
+__all__ = [
+    "InputParser", "DFSSolver", "BFSSolver", "AStarSolver", "BaseSolver"
+    ]

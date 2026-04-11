@@ -17,8 +17,8 @@ class BFSSolver(BaseSolver):
         meaning that it doesn't go any deeper without checking all other
         way at the same time. example he checks all the cells situated 1
         steps of the starting point, the all the cells situated 2 steps, ...
-        That means that he is able to find the shortest path without doing a lot
-        of math
+        That means that he is able to find the shortest path without doing a
+        lot of math
 
         Returns:
             list[str] | None:
@@ -36,7 +36,7 @@ class BFSSolver(BaseSolver):
             return []
 
         queue = deque([self.starting])
-        visited = {self.starting}
+        visited: set[tuple[int, int]] = {self.starting}
         previous: dict[tuple[int, int], tuple[tuple[int, int], str]] = {}
 
         while queue:
@@ -65,6 +65,11 @@ class BFSSolver(BaseSolver):
         return directions
 
     def solve_as_string(self) -> str:
+        """Solve the maze and return the path as a string
+
+        Returns:
+            str: The start-end path of the maze
+        """
         path = self.solve()
         if path is None:
             return "NO PATH"

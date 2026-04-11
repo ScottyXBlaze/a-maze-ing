@@ -2,8 +2,10 @@ from .huntandkill import HuntAndKill
 
 
 class MazeGenerator:
+    """Maze Generator class to generate maze
+    """
     def __init__(self, size: tuple[int, int], perfect: bool = True) -> None:
-        """setup for all the config of the maze
+        """setup and init for all the config of the maze
 
         Args:
             size (tuple[int, int]): the size of the maze
@@ -17,7 +19,7 @@ class MazeGenerator:
         self.perfect = perfect
 
     def generate_grid(self) -> list[list[str]]:
-        """Generate a grid full of walls
+        """Generate a grid full of walls 'F'
 
         Returns:
             list[list[str]]: grid in 2D
@@ -33,7 +35,8 @@ class MazeGenerator:
     def get_forty_two_positions(
         self,
     ) -> set[tuple[int, int]]:
-        """Checks all the positions for the 42 logo in the maze
+        """Checks all the positions for the 42 logo in the maze and None
+        if the maze is too small
 
         Returns:
             set[tuple[int, int]]: all the positions of the logo in the maze
@@ -59,7 +62,7 @@ class MazeGenerator:
         return set(positions)
 
     def generate_maze(self, seed: int | None = None) -> list[list[str]]:
-        """Generate the maze with a blank grid
+        """Generate the maze
 
         Args:
             seed (int | None, optional): The seed provided to generate maze.

@@ -5,7 +5,10 @@ class BaseSolver(ABC):
     """Contains all the base function and variable for a maze solver"""
 
     def __init__(
-        self, maze: list[list[str]], starting: tuple[int, int], ending: tuple[int, int]
+        self,
+        maze: list[list[str]],
+        starting: tuple[int, int],
+        ending: tuple[int, int]
     ) -> None:
         """Every Initialization starts here
 
@@ -15,7 +18,9 @@ class BaseSolver(ABC):
             ending (tuple[int, int]): The ending position
         """
         self.dir_to_bit = {"N": 0, "E": 1, "S": 2, "W": 3}
-        self.dir_to_offset = {"N": (-1, 0), "E": (0, 1), "S": (1, 0), "W": (0, -1)}
+        self.dir_to_offset = {
+            "N": (-1, 0), "E": (0, 1), "S": (1, 0), "W": (0, -1)
+            }
         self.direction_order = ("N", "E", "S", "W")
 
         self.maze = maze
@@ -48,7 +53,10 @@ class BaseSolver(ABC):
         """
         return int(self.maze[row][col], 16)
 
-    def neighbors(self, position: tuple[int, int]) -> list[tuple[str, tuple[int, int]]]:
+    def neighbors(
+            self,
+            position: tuple[int, int]
+            ) -> list[tuple[str, tuple[int, int]]]:
         """Checks all the neighbors of th cell
 
         Args:
@@ -56,7 +64,7 @@ class BaseSolver(ABC):
              that we want to check
 
         Returns:
-            list[tuple[str, tuple[int, int]]]: direciton and position of
+            list[tuple[str, tuple[int, int]]]: direction and position of
              the neighbors cells
         """
         row, col = position
@@ -88,9 +96,18 @@ class BaseSolver(ABC):
 
     @abstractmethod
     def solve_as_string(self) -> str:
-        pass
+        """Solve the maze and return a string of the path
 
+        Returns:
+            str: The string of the path
+        """
+        pass
 
     @abstractmethod
     def solve(self) -> list[str] | None:
+        """Solve the maze and return the path in a list
+
+        Returns:
+            list[str] | None: The path of the start to end path
+        """
         return ['']

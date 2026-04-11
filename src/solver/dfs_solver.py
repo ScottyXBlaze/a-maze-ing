@@ -1,12 +1,12 @@
-from typing import List, Optional
+from typing import Any, List, Optional
 from .base_solver import BaseSolver
 
 
 class DFSSolver(BaseSolver):
     """The DFS algorithm who is used for basic maze
       It is not as good as other algorithm but it is
-      easy to lean and understand and can easily solve
-      perfect maze and unperfect one (but not the most optimal
+      easy to learn and understand and can easily solve
+      perfect maze and imperfect one (but not the most optimal
       path sadly)
 
     Args:
@@ -20,9 +20,9 @@ class DFSSolver(BaseSolver):
         only if he founds the path or that every available cells are visited
 
         Returns:
-            Optional[List[str]]: the path in a list or None if no path was found
+            Optional[List[str]]: the path in a list or None if no path was
+            found
         """
-        # Gestion d'erreur juste au cas ou
         if (
             not self.maze
             or not self._is_valid_pos(*self.starting)
@@ -33,34 +33,25 @@ class DFSSolver(BaseSolver):
         if self.starting == self.ending:
             return []
 
-        # STACK pour DFS (Last In First Out)
-        # Chaque élément contient : (position actuelle, chemin accumulé)
-        stack = [(self.starting, [])]
+        stack: list[tuple[tuple[int, int], list[Any]]] = [(self.starting, [])]
 
-        # Ensemble des cases déjà visitées
         visited = {self.starting}
 
         while stack:
-            # DFS : on prend le DERNIER élément ajouté (LIFO)
             current_pos, path = stack.pop()
 
-            # Si on a atteint l'arrivée, retourner le chemin
             if current_pos == self.ending:
                 return path
 
-            # Explorer les voisins
             for direction, neighbor in self.neighbors(current_pos):
                 if neighbor in visited:
                     continue
 
-                # Marquer le voisin comme visité
                 visited.add(neighbor)
 
-                # Ajouter le voisin à la stack avec le nouveau chemin
                 new_path = path + [direction]
                 stack.append((neighbor, new_path))
 
-        # Aucun chemin trouvé
         return None
 
     def solve_as_string(self) -> str:
