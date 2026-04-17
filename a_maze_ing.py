@@ -61,8 +61,6 @@ class Main:
 
         self.config: InputParser.MazeConfig = self.get_input()
 
-        self.cell_size = 19
-
         self.color_choices = self.get_colors()
 
         self.color_choice = random.choice(self.color_choices)
@@ -83,7 +81,7 @@ class Main:
         self.maze_solver = self.get_algorithm()
 
         self.mlx_ptr: Any = self.m.mlx_init()
-        self.width, self.height = self.get_window_size()
+        self.cell_size, self.width, self.height = self.get_window_size()
         self.win_mlx: Any = self.m.mlx_new_window(
             self.mlx_ptr, self.width, self.height, "A-Maze-Ing!"
         )
@@ -143,15 +141,21 @@ class Main:
         else:
             return AStarSolver(self.maze, entry_point, exit_point)
 
-    def get_window_size(self) -> tuple[int, int]:
+    def get_window_size(self) -> tuple[int, int, int]:
         """Return the best size of the window
 
         Returns:
             tuple[int, int]: The width and height of the window
         """
+        self.cell_size = 19
         width: int = self.config["WIDTH"] * self.cell_size + 2
         height: int = self.config["HEIGHT"] * self.cell_size + 2
-        return width, height
+        (_, w, h) = self.m.mlx_get_screen_size(self.mlx_ptr)
+        while height > h or width > w:
+            self.cell_size -= 1
+            width: int = self.config["WIDTH"] * self.cell_size + 2
+            height: int = self.config["HEIGHT"] * self.cell_size + 2
+        return self.cell_size, width, height
 
     @staticmethod
     def show_help() -> None:

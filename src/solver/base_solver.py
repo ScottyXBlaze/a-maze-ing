@@ -32,6 +32,7 @@ class BaseSolver(ABC):
         self.height = len(maze)
         self.width = len(maze[0]) if maze else 0
         self.visited_cells: list[tuple[int, int]] = []
+        self._visited_cached: bool = False
 
     def _is_valid_pos(self, row: int, col: int) -> bool:
         """Verify if the coordinate is in the maze
@@ -96,6 +97,8 @@ class BaseSolver(ABC):
         self.maze = maze
         self.height = len(maze)
         self.width = len(maze[0]) if maze else 0
+        self.visited_cells = []
+        self._visited_cached = False
 
     @abstractmethod
     def solve_as_string(self) -> str:
@@ -116,5 +119,7 @@ class BaseSolver(ABC):
         return [""]
 
     def get_visited_cells(self) -> list[tuple[int, int]]:
-        self.solve()
+        if not self._visited_cached:
+            self.solve()
+            self._visited_cached = True
         return self.visited_cells

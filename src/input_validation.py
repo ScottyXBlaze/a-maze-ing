@@ -158,11 +158,11 @@ class InputParser:
         Raises:
             ValueError: If any of the settings is invalid
         """
-        if not (0 < config["WIDTH"] <= 100):
+        if not (0 < config["WIDTH"] <= 300):
             raise ValueError(
                 f"Invalid config value for WIDTH: {config['WIDTH']}"
                 )
-        if not (0 < config["HEIGHT"] <= 50):
+        if not (0 < config["HEIGHT"] <= 150):
             raise ValueError(
                 f"Invalid config value for HEIGHT: {config['HEIGHT']}"
                 )
