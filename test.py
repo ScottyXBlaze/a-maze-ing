@@ -1,8 +1,6 @@
-import mazegen
+from mazegenerator import MazeGenerator
 
-maze = mazegen.MazeGenerator((100, 100), False)
-grid = maze.generate_maze()
-for line in grid:
-    for cell in line:
-        print(cell, end="")
-    print()
+generator = MazeGenerator((20, 20), perfect=True)
+
+# Generate the maze in a list format
+maze = generator.generate_maze(seed=42)

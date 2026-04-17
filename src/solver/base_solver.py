@@ -8,7 +8,7 @@ class BaseSolver(ABC):
         self,
         maze: list[list[str]],
         starting: tuple[int, int],
-        ending: tuple[int, int]
+        ending: tuple[int, int],
     ) -> None:
         """Every Initialization starts here
 
@@ -19,8 +19,11 @@ class BaseSolver(ABC):
         """
         self.dir_to_bit = {"N": 0, "E": 1, "S": 2, "W": 3}
         self.dir_to_offset = {
-            "N": (-1, 0), "E": (0, 1), "S": (1, 0), "W": (0, -1)
-            }
+            "N": (-1, 0),
+            "E": (0, 1),
+            "S": (1, 0),
+            "W": (0, -1),
+        }
         self.direction_order = ("N", "E", "S", "W")
 
         self.maze = maze
@@ -28,6 +31,7 @@ class BaseSolver(ABC):
         self.ending = ending
         self.height = len(maze)
         self.width = len(maze[0]) if maze else 0
+        self.visited_cells: list[tuple[int, int]] = []
 
     def _is_valid_pos(self, row: int, col: int) -> bool:
         """Verify if the coordinate is in the maze
@@ -54,9 +58,8 @@ class BaseSolver(ABC):
         return int(self.maze[row][col], 16)
 
     def neighbors(
-            self,
-            position: tuple[int, int]
-            ) -> list[tuple[str, tuple[int, int]]]:
+        self, position: tuple[int, int]
+    ) -> list[tuple[str, tuple[int, int]]]:
         """Checks all the neighbors of th cell
 
         Args:
@@ -64,16 +67,16 @@ class BaseSolver(ABC):
              that we want to check
 
         Returns:
-            list[tuple[str, tuple[int, int]]]: direction and position of
+            list[tuple[str, tuple[int, int]]]: direciton and position of
              the neighbors cells
         """
         row, col = position
-        cell = self._cell_value(row, col)
-        result = []
+        cell: int = self._cell_value(row, col)
+        result: list[tuple[str, tuple[int, int]]] = []
 
         for direction in self.direction_order:
-            bit_index = self.dir_to_bit[direction]
-            has_wall = ((cell >> bit_index) & 1) == 1
+            bit_index: int = self.dir_to_bit[direction]
+            has_wall: bool = ((cell >> bit_index) & 1) == 1
             if has_wall:
                 continue
 
@@ -110,4 +113,8 @@ class BaseSolver(ABC):
         Returns:
             list[str] | None: The path of the start to end path
         """
-        return ['']
+        return [""]
+
+    def get_visited_cells(self) -> list[tuple[int, int]]:
+        self.solve()
+        return self.visited_cells

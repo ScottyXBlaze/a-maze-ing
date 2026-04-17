@@ -1,10 +1,12 @@
-# Width of the maze
-# Valid: 0 to 100
+# Witdh of the maze
+# Valid: 1 to 100
+WIDTH = 20
 WIDTH = 100
 
 # Height of the maze
-# Valid: 0 to 50
-HEIGHT = 50
+# Valid: 1 to 50
+# HEIGHT = 20
+ HEIGHT = 50
 
 # Entry point of the maze
 # Valid: (x,y) or just x,y
@@ -12,6 +14,7 @@ ENTRY = 0,0
 
 # Exit point of the maze
 # Valid: (x,y) or just x,y
+# EXIT = 19,19
 EXIT = 99,49
 
 # The output of the file
@@ -31,4 +34,4 @@ ANIMATION = 1
 
 # Algorithm to generate the maze
 # Valid: 'DFS', 'BFS', 'ASTAR' or 'AUTO'
-ALGO = BFS
+ALGO = ASTAR

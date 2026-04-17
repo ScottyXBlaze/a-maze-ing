@@ -1,5 +1,5 @@
 class Parser:
-    """Basic parsers that use to convert string into a valid type
+    """Basic parsers that use to convert string into an appropriated type
 
     Raises:
         ValueError: If the string cannot be converted into the expected type
@@ -26,7 +26,7 @@ class Parser:
 
     @staticmethod
     def parse_point(value: str) -> tuple[int, int]:
-        """Take a tuple like string and return its transformed value into tuple
+        """Take a tuple like string and return its cast value into tuple
 
         Args:
             value (str): the tuple in string we want to convert
@@ -41,5 +41,5 @@ class Parser:
         if not (cleaned.startswith("(") and cleaned.endswith(")")):
             x_str, y_str = cleaned.split(",")
         else:
-            x_str, y_str = cleaned[1:-1:1].split(",")
+            x_str, y_str = cleaned[1:-1].split(",")
         return int(x_str.strip()), int(y_str.strip())

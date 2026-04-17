@@ -1,9 +1,15 @@
 from .huntandkill import HuntAndKill
 
 
+class InputValidation:
+    @staticmethod
+    def validate_size(size: tuple[int, int]) -> bool:
+        return 0 < size[0] <= 500 and 0 < size[1] <= 500
+
+
 class MazeGenerator:
-    """Maze Generator class to generate maze
-    """
+    """Maze Generator class to generate maze"""
+
     def __init__(self, size: tuple[int, int], perfect: bool = True) -> None:
         """setup and init for all the config of the maze
 
@@ -11,12 +17,21 @@ class MazeGenerator:
             size (tuple[int, int]): the size of the maze
             perfect (bool, optional): True to have only one path.
         """
-        self.width = size[0]
-        self.height = size[1]
+        input_validation = InputValidation()
+        if not input_validation.validate_size(size):
+            raise ValueError(
+                "[Error] Invalid size for the maze (negative or too big)"
+            )
+        self._width = size[0]
+        self._height = size[1]
 
-        self.maze = self.generate_grid()
+        self._maze = self.generate_grid()
 
-        self.perfect = perfect
+        self._perfect = perfect
+
+    def toggle_perfect(self) -> None:
+        """Toggle generation perfection"""
+        self._perfect = not self._perfect
 
     def generate_grid(self) -> list[list[str]]:
         """Generate a grid full of walls 'F'
@@ -24,10 +39,10 @@ class MazeGenerator:
         Returns:
             list[list[str]]: grid in 2D
         """
-        grid = []
-        for _ in range(self.height):
-            row = []
-            for _ in range(self.width):
+        grid: list[list[str]] = []
+        for _ in range(self._height):
+            row: list[str] = []
+            for _ in range(self._width):
                 row.append("F")
             grid.append(row)
         return grid
@@ -41,10 +56,10 @@ class MazeGenerator:
         Returns:
             set[tuple[int, int]]: all the positions of the logo in the maze
         """
-        center_row = self.height // 2
-        center_col = self.width // 2
+        center_row: int = self._height // 2
+        center_col: int = self._width // 2
         positions: list[tuple[int, int]] = []
-        if self.width <= 8 or self.height <= 6:
+        if self._width <= 8 or self._height <= 6:
             return set(positions)
         for i in range(3, 0, -1):
             positions.extend(
@@ -71,18 +86,18 @@ class MazeGenerator:
         Returns:
             list[list[str]]: le maze created
         """
-        self.maze = self.generate_grid()
-        positions = self.get_forty_two_positions()
+        self._maze = self.generate_grid()
+        positions: set[tuple[int, int]] = self.get_forty_two_positions()
         for pos in positions:
-            self.maze[pos[0]][pos[1]] = "42"
+            self._maze[pos[0]][pos[1]] = "42"
         generator = HuntAndKill(
-            (self.width, self.height),
-            self.maze,
+            (self._width, self._height),
+            self._maze,
             positions,
             seed=seed,
-            perfect=self.perfect
-            )
+            perfect=self._perfect,
+        )
         generator.run()
         for pos in self.get_forty_two_positions():
-            self.maze[pos[0]][pos[1]] = "F"
-        return self.maze
+            self._maze[pos[0]][pos[1]] = "F"
+        return self._maze

@@ -13,7 +13,7 @@ class InputParser:
         ValueError: If the config file is invalid or if there is a missing key
     """
     class PartialMazeConfig(TypedDict, total=False):
-        """Partial config type hint, used during parsing"""
+
         WIDTH: int
         HEIGHT: int
         ENTRY: tuple[int, int]
@@ -26,9 +26,6 @@ class InputParser:
 
     class MazeConfig(TypedDict):
         """General config type hint
-
-        Args:
-            TypedDict (class): Base class for hinting with dict
         """
 
         WIDTH: int
@@ -118,8 +115,9 @@ class InputParser:
         else:
             raise ValueError(f"Unrecognized config key: {key}")
 
+    @staticmethod
     def get_forty_two_positions(
-        self, width: int, height: int
+        width: int, height: int
     ) -> tuple[tuple[int, int], ...]:
         """Get all the position of the 42 logo in the maze if there is one
 
@@ -152,7 +150,7 @@ class InputParser:
         return tuple(positions)
 
     def validate_config(self, config: MazeConfig) -> None:
-        """Validate every settings in the config
+        """Validate every setting in the config
 
         Args:
             config (MazeConfig): The dict that has all the settings
@@ -205,10 +203,10 @@ class InputParser:
     def is_complete_config(
             self, config: PartialMazeConfig
             ) -> TypeGuard[MazeConfig]:
-        """Check if every config is in the dictionnary
+        """Check if every config is in the dictionary
 
         Args:
-            config (PartialMazeConfig): The dictionnary of the config
+            config (PartialMazeConfig): The dictionary of the config
 
         Returns:
             TypeGuard[MazeConfig]: boolean that indicate if the config is
@@ -217,10 +215,10 @@ class InputParser:
         return all(key in config for key in self.required_keys)
 
     def check_missing(self, config: PartialMazeConfig) -> MazeConfig:
-        """Check if all the config are in the dictionnary
+        """Check if all the config are in the dictionary
 
         Args:
-            config (PartialMazeConfig): The dictionnary of the config
+            config (PartialMazeConfig): The dictionary of the config
 
         Raises:
             ValueError: If any required config key is missing

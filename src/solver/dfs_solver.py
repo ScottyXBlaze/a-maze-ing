@@ -6,7 +6,7 @@ class DFSSolver(BaseSolver):
     """The DFS algorithm who is used for basic maze
       It is not as good as other algorithm but it is
       easy to learn and understand and can easily solve
-      perfect maze and imperfect one (but not the most optimal
+      perfect maze and unperfect one (but not the most optimal
       path sadly)
 
     Args:
@@ -36,6 +36,7 @@ class DFSSolver(BaseSolver):
         stack: list[tuple[tuple[int, int], list[Any]]] = [(self.starting, [])]
 
         visited = {self.starting}
+        self.visited_cells = []
 
         while stack:
             current_pos, path = stack.pop()
@@ -48,6 +49,8 @@ class DFSSolver(BaseSolver):
                     continue
 
                 visited.add(neighbor)
+                if not neighbor == self.ending:
+                    self.visited_cells.append(neighbor)
 
                 new_path = path + [direction]
                 stack.append((neighbor, new_path))

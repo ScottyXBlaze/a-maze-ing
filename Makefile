@@ -4,7 +4,7 @@ PY = $(BIN)/python3
 PIP = $(BIN)/pip
 RM = rm -rf
 
-REQUIREMENT	= flake8 mypy
+REQUIREMENT	= flake8 mypy poetry
 
 C_RESET		= \033[0m
 C_GREEN		= \033[032m
@@ -54,10 +54,5 @@ lint-strict: ${VENV}
 	@echo "${C_MAGENTA}Note: 'mlx' is a third-party library without type hints; related mypy warnings are expected.${C_RESET}"
 	@echo "${C_BLUE}...${C_RESET}"
 	@${PY} -m mypy . --strict
-
-delete:
-	rm -rf ${VENV}
-
-re: clean delete install run
 
 .PHONY: install run clean lint lint-strict

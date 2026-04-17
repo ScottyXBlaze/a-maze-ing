@@ -15,11 +15,11 @@ class AStarSolver(BaseSolver):
     """
 
     def heuristic(self, pos: Tuple[int, int]) -> int:
-        """Calculate the distance between a position and
+        """Calculate the distance between a postion and
         the ending of the maze using the Manhattan distance
 
         Args:
-            pos (Tuple[int, int]): the position to do the math
+            pos (Tuple[int, int]): the postion to do the math
 
         Returns:
             int: the distance between the pos and the ending
@@ -45,6 +45,7 @@ class AStarSolver(BaseSolver):
         heapq.heappush(open_set, (0 + self.heuristic(start), 0, start, []))
 
         visited = set()
+        self.visited_cells = []
 
         while open_set:
             _, cost_so_far, current, path = heapq.heappop(open_set)
@@ -53,6 +54,8 @@ class AStarSolver(BaseSolver):
                 continue
 
             visited.add(current)
+            if not current == self.starting and not current == self.ending:
+                self.visited_cells.append(current)
 
             if current == goal:
                 return path
@@ -74,10 +77,10 @@ class AStarSolver(BaseSolver):
         return None
 
     def solve_as_string(self) -> str:
-        """Solve the maze and transform the path into a string
+        """Solve the maze and transorm the path into a string
 
         Returns:
-            str: the path in string
+            str: the formated string
         """
         path = self.solve()
         if path is None:

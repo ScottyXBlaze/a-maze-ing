@@ -35,12 +35,13 @@ class BFSSolver(BaseSolver):
         if self.starting == self.ending:
             return []
 
-        queue = deque([self.starting])
+        queue: deque[tuple[int, int]] = deque([self.starting])
         visited: set[tuple[int, int]] = {self.starting}
+        self.visited_cells = []
         previous: dict[tuple[int, int], tuple[tuple[int, int], str]] = {}
 
         while queue:
-            current = queue.popleft()
+            current: tuple[int, int] = queue.popleft()
 
             if current == self.ending:
                 break
@@ -49,14 +50,16 @@ class BFSSolver(BaseSolver):
                 if nxt in visited:
                     continue
                 visited.add(nxt)
+                if not nxt == self.ending:
+                    self.visited_cells.append(nxt)
                 previous[nxt] = (current, direction)
                 queue.append(nxt)
 
         if self.ending not in visited:
             return None
 
-        directions = []
-        cursor = self.ending
+        directions: list[str] = []
+        cursor: tuple[int, int] = self.ending
         while cursor != self.starting:
             parent, direction = previous[cursor]
             directions.append(direction)
@@ -70,7 +73,7 @@ class BFSSolver(BaseSolver):
         Returns:
             str: The start-end path of the maze
         """
-        path = self.solve()
+        path: list[str] | None = self.solve()
         if path is None:
             return "NO PATH"
         return "".join(path)
