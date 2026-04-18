@@ -1,19 +1,24 @@
+"""Module that contains the class that load every config for the program."""
+
 from pathlib import Path
 from typing import TypedDict, TypeGuard
 from .parsers import Parser
 
 
 class InputParser:
-    """Basic Input parsers for the maze generator, it is used to parse the
-    config file and check if all the config are valid, it also contains
-    some useful function to check edge cases and to get the position of the
-    '42' pattern in the maze
+    """Basic Input parsers for the maze generator.
+
+    it is used to parse the config file and check if all the config are valid,
+    it also contains some useful function to check edge cases and to get the
+    position of the '42' pattern in the maze
 
     Raises:
         ValueError: If the config file is invalid or if there is a missing key
     """
 
     class PartialMazeConfig(TypedDict, total=False):
+        """Partial maze config for the maze."""
+
         WIDTH: int
         HEIGHT: int
         ENTRY: tuple[int, int]
@@ -25,7 +30,7 @@ class InputParser:
         ALGO: str
 
     class MazeConfig(TypedDict):
-        """General config type hint"""
+        """General config type hint."""
 
         WIDTH: int
         HEIGHT: int
@@ -38,8 +43,7 @@ class InputParser:
         ALGO: str
 
     def __init__(self) -> None:
-        """Everything start here"""
-
+        """Everything start here."""
         self.parsers = Parser()
 
         self.required_keys = {
@@ -67,12 +71,12 @@ class InputParser:
         }
 
     def set_algo(self, algo_name: str) -> None:
-        """Set the algorithm to use for solving the maze"""
+        """Set the algorithm to use for solving the maze."""
         if algo_name.upper() in {"DFS", "BFS", "ASTAR", "AUTO"}:
             self.default_config["ALGO"] = algo_name.upper()
 
     def parse_line(self, line: str, config: PartialMazeConfig) -> None:
-        """Check each line and convert them with the available parsers
+        """Check each line and convert them with the available parsers.
 
         Args:
             line (str): The line of the key-value to parse
@@ -117,7 +121,7 @@ class InputParser:
     def get_forty_two_positions(
         width: int, height: int
     ) -> tuple[tuple[int, int], ...]:
-        """Get all the position of the 42 logo in the maze if there is one
+        """Get all the position of the 42 logo in the maze if there is one.
 
         Args:
             width (int): the width of the maze
@@ -148,7 +152,7 @@ class InputParser:
         return tuple(positions)
 
     def validate_config(self, config: MazeConfig) -> None:
-        """Validate every setting in the config
+        """Validate every setting in the config.
 
         Args:
             config (MazeConfig): The dict that has all the settings
@@ -202,7 +206,7 @@ class InputParser:
     def is_complete_config(
         self, config: PartialMazeConfig
     ) -> TypeGuard[MazeConfig]:
-        """Check if every config is in the dictionary
+        """Check if every config is in the dictionary.
 
         Args:
             config (PartialMazeConfig): The dictionary of the config
@@ -214,7 +218,7 @@ class InputParser:
         return all(key in config for key in self.required_keys)
 
     def check_missing(self, config: PartialMazeConfig) -> MazeConfig:
-        """Check if all the config are in the dictionary
+        """Check if all the config are in the dictionary.
 
         Args:
             config (PartialMazeConfig): The dictionary of the config
@@ -236,7 +240,7 @@ class InputParser:
         return config
 
     def load_config(self, path: str) -> MazeConfig:
-        """Load the configuration in the path
+        """Load the configuration in the path.
 
         Args:
             path (str): The path of the file we want to load the config from

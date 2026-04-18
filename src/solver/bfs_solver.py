@@ -1,10 +1,13 @@
+"""Module that contain the BFS solver."""
+
 from .base_solver import BaseSolver
 from collections import deque
 
 
 class BFSSolver(BaseSolver):
-    """The BFS algorithm is a popular algorithm that solve maze
-    and give the most optimal path, even if it consume a lot of
+    """The BFS algorithm is a popular algorithm that solve maze.
+
+    It give the most optimal path, even if it consume a lot of
     processor, it is easy to implement and understand making it
     beginner-friendly
 
@@ -13,8 +16,9 @@ class BFSSolver(BaseSolver):
     """
 
     def solve(self) -> list[str] | None:
-        """This solve the entire maze, it traverse cell step by step.
-        meaning that it doesn't go any deeper without checking all other
+        """Solve the entire maze, it traverse cell step by step.
+
+        It doesn't go any deeper without checking all other
         way at the same time. example he checks all the cells situated 1
         steps of the starting point, the all the cells situated 2 steps, ...
         That means that he is able to find the shortest path without doing a
@@ -68,7 +72,7 @@ class BFSSolver(BaseSolver):
         return directions
 
     def solve_as_string(self) -> str:
-        """Solve the maze and return the path as a string
+        """Solve the maze and return the path as a string.
 
         Returns:
             str: The start-end path of the maze

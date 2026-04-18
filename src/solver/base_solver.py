@@ -1,8 +1,10 @@
+"""Module that has the base class for all the solver."""
+
 from abc import abstractmethod, ABC
 
 
 class BaseSolver(ABC):
-    """Contains all the base function and variable for a maze solver"""
+    """Contains all the base function and variable for a maze solver."""
 
     def __init__(
         self,
@@ -10,7 +12,7 @@ class BaseSolver(ABC):
         starting: tuple[int, int],
         ending: tuple[int, int],
     ) -> None:
-        """Every Initialization starts here
+        """Every Initialization starts here.
 
         Args:
             maze (list[list[str]]): The maze to solve
@@ -35,7 +37,7 @@ class BaseSolver(ABC):
         self._visited_cached: bool = False
 
     def _is_valid_pos(self, row: int, col: int) -> bool:
-        """Verify if the coordinate is in the maze
+        """Verify if the coordinate is in the maze.
 
         Args:
             row (int): row in the maze
@@ -47,7 +49,7 @@ class BaseSolver(ABC):
         return 0 <= row < self.height and 0 <= col < self.width
 
     def _cell_value(self, row: int, col: int) -> int:
-        """Give the value of a point in the maze
+        """Give the value of a point in the maze.
 
         Args:
             row (int): the row of the cell
@@ -61,7 +63,7 @@ class BaseSolver(ABC):
     def neighbors(
         self, position: tuple[int, int]
     ) -> list[tuple[str, tuple[int, int]]]:
-        """Checks all the neighbors of th cell
+        """Check all the neighbors of the cell.
 
         Args:
             position (tuple[int, int]): the position of the cell
@@ -89,7 +91,7 @@ class BaseSolver(ABC):
         return result
 
     def set_new_maze(self, maze: list[list[str]]) -> None:
-        """Change the maze in the solver
+        """Change the maze in the solver.
 
         Args:
             maze (list[list[str]]): The new maze
@@ -102,7 +104,7 @@ class BaseSolver(ABC):
 
     @abstractmethod
     def solve_as_string(self) -> str:
-        """Solve the maze and return a string of the path
+        """Solve the maze and return a string of the path.
 
         Returns:
             str: The string of the path
@@ -111,7 +113,7 @@ class BaseSolver(ABC):
 
     @abstractmethod
     def solve(self) -> list[str] | None:
-        """Solve the maze and return the path in a list
+        """Solve the maze and return the path in a list.
 
         Returns:
             list[str] | None: The path of the start to end path
@@ -119,6 +121,11 @@ class BaseSolver(ABC):
         return [""]
 
     def get_visited_cells(self) -> list[tuple[int, int]]:
+        """Get a list of all the visited cells.
+
+        Returns:
+            list[tuple[int, int]]: The list of all the position of the cell
+        """
         if not self._visited_cached:
             self.solve()
             self._visited_cached = True

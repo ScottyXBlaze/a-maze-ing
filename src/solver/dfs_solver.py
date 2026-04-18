@@ -1,9 +1,12 @@
+"""Module that contain the DFS solver."""
+
 from typing import Any, List, Optional
 from .base_solver import BaseSolver
 
 
 class DFSSolver(BaseSolver):
-    """The DFS algorithm who is used for basic maze
+    """The DFS algorithm who is used for basic maze.
+
       It is not as good as other algorithm but it is
       easy to learn and understand and can easily solve
       perfect maze and unperfect one (but not the most optimal
@@ -14,10 +17,12 @@ class DFSSolver(BaseSolver):
     """
 
     def solve(self) -> Optional[List[str]]:
-        """This solve the entire maze, it is done by checking random
-        path and traverse them until he reach a dead-end, then go back
-        until he founds another unvisited path and wander there. the algo end
-        only if he founds the path or that every available cells are visited
+        """Solve the entire maze.
+
+        It is done by checking random path and traverse them until he reach a
+        dead-end, then go back until he founds another unvisited path and
+        wander there. the algo end only if he founds the path or that every
+        available cells are visited.
 
         Returns:
             Optional[List[str]]: the path in a list or None if no path was
@@ -58,7 +63,7 @@ class DFSSolver(BaseSolver):
         return None
 
     def solve_as_string(self) -> str:
-        """Convert the path into a string
+        """Convert the path into a string.
 
         Returns:
             str: the path combined

@@ -1,8 +1,11 @@
+"""Module that contain the Hunt And Kill stategy."""
+
 from random import Random
 
 
 class HuntAndKill:
-    """Hunt and kill maze generator algorithm
+    """Hunt and kill maze generator algorithm.
+
     it is a randomized algorithm that creates random path like a random walk,
     but when it reaches a dead-end,it hunts for an unvisited cell that is
     adjacent to a visited one and creates a path between them, then it
@@ -19,7 +22,7 @@ class HuntAndKill:
         seed: int | None = None,
         perfect: bool = True,
     ):
-        """Initialize all the config for the maze Generator
+        """Initialize all the config for the maze Generator.
 
         Args:
             size (tuple[int, int]): the size of the maze
@@ -48,7 +51,7 @@ class HuntAndKill:
         self._perfect_percent = 0.2
 
     def _hunt(self) -> tuple[int, int] | None:
-        """Checks an unvisited cell that is near a visited one
+        """Check an unvisited cell that is near a visited one.
 
         Returns:
             tuple[int, int] | None: the unvisited cell
@@ -64,7 +67,7 @@ class HuntAndKill:
     def _delete_wall_between(
         self, pos1: tuple[int, int], pos2: tuple[int, int]
     ) -> None:
-        """Remove the wall between two positions
+        """Remove the wall between two positions.
 
         Args:
             pos1 (tuple[int, int]): Initial position
@@ -82,7 +85,7 @@ class HuntAndKill:
         self._delete_wall(pos2, opposite)
 
     def _delete_wall(self, pos: tuple[int, int], direction: str) -> None:
-        """Delete a wall of a cell
+        """Delete a wall of a cell.
 
         Args:
             pos (tuple[int, int]): The position of the cell in the maze
@@ -94,7 +97,7 @@ class HuntAndKill:
         self._maze[pos[0]][pos[1]] = hex(bits)[2:].upper()
 
     def _add_wall(self, pos: tuple[int, int], direction: str) -> None:
-        """Add a wall to a cell
+        """Add a wall to a cell.
 
         Args:
             pos (tuple[int, int]): The position of the cell in the maze
@@ -106,7 +109,7 @@ class HuntAndKill:
         self._maze[pos[0]][pos[1]] = hex(bits)[2:].upper()
 
     def _is_valid_pos(self, row: int, col: int) -> bool:
-        """Check if the position is valid for the maze
+        """Check if the position is valid for the maze.
 
         Args:
             row (int): the row in the maze
@@ -118,7 +121,7 @@ class HuntAndKill:
         return 0 <= row < self._height and 0 <= col < self._width
 
     def check_directions_visited(self, pos: tuple[int, int]) -> list[str]:
-        """Checks all the visited direction of the cells
+        """Check all the visited direction of the cells.
 
         Args:
             pos (tuple[int, int]): the position of the cells
@@ -138,7 +141,7 @@ class HuntAndKill:
         return directions
 
     def check_walls(self, pos: tuple[int, int]) -> list[str]:
-        """Checks all the walls of the cell
+        """Check all the walls of the cell.
 
         Args:
             pos (tuple[int, int]): The position of the cell in the maze
@@ -146,7 +149,6 @@ class HuntAndKill:
         Returns:
             list[str]: the list of walls (N, S, E, W)
         """
-
         available_wall = []
         try:
             number = int(self._maze[pos[0]][pos[1]], 16)
@@ -165,7 +167,7 @@ class HuntAndKill:
         return available_wall
 
     def _delete_random_walls(self) -> None:
-        """Delete a random wall in the maze"""
+        """Delete a random wall in the maze."""
         available_wall: list[str] = []
         pos: tuple[int, int] = (0, 0)
 
@@ -197,7 +199,7 @@ class HuntAndKill:
                 return
 
     def check_directions_unvisited(self, pos: tuple[int, int]) -> list[str]:
-        """Checks every directions of a cell that are unvisited
+        """Check every directions of a cell that are unvisited.
 
         Args:
             pos (tuple[int, int]): the position of the cell
@@ -214,7 +216,7 @@ class HuntAndKill:
         return directions
 
     def _generate_path(self, pos: tuple[int, int]) -> None:
-        """Generate a randomized path in the maze
+        """Generate a randomized path in the maze.
 
         Args:
             pos (tuple[int, int]): The initial position of the cell
@@ -231,7 +233,7 @@ class HuntAndKill:
             current_pos = new_pos
 
     def _link_with_visited(self, pos: tuple[int, int]) -> None:
-        """Link and unvisited cell with a visited one
+        """Link and unvisited cell with a visited one.
 
         Args:
             pos (tuple[int, int]): The position of the unvisited cell
@@ -244,14 +246,12 @@ class HuntAndKill:
             self._delete_wall_between(pos, new_pos)
 
     def avoid_3x3(self) -> None:
-        # Find a cell with 0 wall
+        """Avoid 3x3 wall by adding a wall to the center."""
         no_walls: list[tuple[int, int]] = []
         for row in range(self._width):
             for col in range(self._height):
                 if self._maze[row][col] == "0":
                     no_walls.append((row, col))
-        # Check all the neigbord and see if they only have one or two walls
-        # based on their position diagonal or not
 
         for no_wall in no_walls:
             if self.is_open(no_wall):
@@ -260,10 +260,20 @@ class HuntAndKill:
                 self._add_wall(opposite, "S")
 
     def is_open(self, pos: tuple[int, int]) -> bool:
+        """Check if the position have a big open area.
+
+        Args:
+            pos (tuple[int, int]): The position of the center
+             of the area
+
+        Returns:
+            bool: True if it can have the big 3x3 area
+        """
         for direction, offset in self._dir_offsets.items():
             tmp = pos[0] + offset[0], pos[1] + offset[1]
             if self.check_walls(tmp) != ["N"]:
                 return False
+        return True
 
         checks = "NE"
         offset = pos
@@ -276,7 +286,7 @@ class HuntAndKill:
             return True
 
     def run(self) -> None:
-        """Run the Hunt and Kill algorithm to solve the maze"""
+        """Run the Hunt and Kill algorithm to solve the maze."""
         start_pos = (
             self._rng.randint(0, self._height - 1),
             self._rng.randint(0, self._width - 1),

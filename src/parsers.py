@@ -1,12 +1,16 @@
+"""Module that contain a basic parser that convert a string into a value."""
+
+
 class Parser:
-    """Basic parsers that use to convert string into an appropriated type
+    """Basic parsers that use to convert string into an appropriated type.
 
     Raises:
         ValueError: If the string cannot be converted into the expected type
     """
+
     @staticmethod
     def parse_bool(value: str) -> bool:
-        """Translate a string into a boolean
+        """Translate a string into a boolean.
 
         Args:
             value (str): string like TRUE, 1, YES, Y
@@ -26,7 +30,7 @@ class Parser:
 
     @staticmethod
     def parse_point(value: str) -> tuple[int, int]:
-        """Take a tuple like string and return its cast value into tuple
+        """Take a tuple like string and return its cast value into tuple.
 
         Args:
             value (str): the tuple in string we want to convert

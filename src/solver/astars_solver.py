@@ -1,13 +1,16 @@
+"""Module that contain the ASTAR solver."""
+
 import heapq
 from typing import List, Tuple, Optional
 from .base_solver import BaseSolver
 
 
 class AStarSolver(BaseSolver):
-    """A Stars algorithm is probably the most used algo to solve
-    path efficiently. it gives the most optimal path without
-    checking all the cells of the maze, it is faster than BFS
-    because of his pathfinding method and can be easily implemented
+    """A Stars algorithm.
+
+    is probably the most used algo to solve path efficiently. it gives the most
+    optimal path without checking all the cells of the maze, it is faster than
+    BFS because of his pathfinding method and can be easily implemented
     with some easy math
 
     Args:
@@ -15,8 +18,7 @@ class AStarSolver(BaseSolver):
     """
 
     def heuristic(self, pos: Tuple[int, int]) -> int:
-        """Calculate the distance between a postion and
-        the ending of the maze using the Manhattan distance
+        """Calculate the distance of the pos-end with the Manhatan distance.
 
         Args:
             pos (Tuple[int, int]): the postion to do the math
@@ -27,11 +29,12 @@ class AStarSolver(BaseSolver):
         return abs(pos[0] - self.ending[0]) + abs(pos[1] - self.ending[1])
 
     def solve(self) -> Optional[List[str]]:
-        """This solve the entire maze, it calculate the cost of each cell
-        using a formula and prioritize the cell that has the minimal cost
-        estimation to finish the maze, it can optimize the program
-        because we don't have to checks every cells but we can still
-        find the most optimal path
+        """Solve the entire maze.
+
+        It calculate the cost of each cell using a formula and prioritize the
+        cell that has the minimal cost estimation to finish the maze, it can
+        optimize the program because we don't have to checks every cells but
+        we can still find the most optimal path.
 
         Returns:
             Optional[List[str]]: the path in a list or None if no path was
@@ -72,12 +75,12 @@ class AStarSolver(BaseSolver):
 
                 heapq.heappush(
                     open_set, (priority, new_cost, neighbor, new_path)
-                    )
+                )
 
         return None
 
     def solve_as_string(self) -> str:
-        """Solve the maze and transorm the path into a string
+        """Solve the maze and transorm the path into a string.
 
         Returns:
             str: the formated string

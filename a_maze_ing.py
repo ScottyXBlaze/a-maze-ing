@@ -1,3 +1,5 @@
+"""Module that contain the main program for the a-maze-ing."""
+
 import random
 import sys
 from typing import Any
@@ -28,7 +30,7 @@ except ImportError as e:
 
 
 def rgba(r: int, g: int, b: int, a: int = 255) -> int:
-    """Convert rgba format into an integer (#ffffffff format)
+    """Convert rgba format into an integer (#ffffffff format).
 
     Args:
         r (int): red
@@ -43,7 +45,10 @@ def rgba(r: int, g: int, b: int, a: int = 255) -> int:
 
 
 class ImgData:
+    """Basic image class for mlx."""
+
     def __init__(self) -> None:
+        """Every initialization starts here."""
         self.img = None
         self.width = 0
         self.height = 0
@@ -54,11 +59,10 @@ class ImgData:
 
 
 class Main:
-    """The main program"""
+    """The main program."""
 
     def __init__(self) -> None:
-        """Every Initialisation starts here"""
-
+        """Every Initialisation starts here."""
         self.m: Any = mlx.Mlx()
         self.config: InputParser.MazeConfig = self.get_input()
 
@@ -99,12 +103,26 @@ class Main:
         self.background = self.backgrounds.get(self.color_choice[4], ImgData())
 
     def init_background(self) -> dict[str, ImgData]:
+        """Import every .xpm file and convert it into a data to print with mlx.
+
+        Returns:
+            dict[str, ImgData]: Dict that contain the name: ImgData()
+        """
         backgrounds: dict[str, ImgData] = {}
         for color in self.get_colors():
             backgrounds.update({color[4]: self.set_background(color[4])})
         return backgrounds
 
     def set_background(self, name: str) -> ImgData:
+        """Initialize background in the src/image directory.
+
+        Args:
+            name (str): the name of the image without the path nor the .xpm
+             extension
+
+        Returns:
+            ImgData: The Class that contain every proprety for the maze
+        """
         background = ImgData()
         path: str = "src/image/" + name + ".xpm"
         tmp = self.m.mlx_xpm_file_to_image(self.mlx_ptr, path)
@@ -121,6 +139,7 @@ class Main:
         return background
 
     def draw_background(self) -> None:
+        """Draw background image based on the color of the maze."""
         for i in range(0, self.width, 512):
             for j in range(0, self.height, 512):
                 self.m.mlx_put_image_to_window(
@@ -128,7 +147,7 @@ class Main:
                 )
 
     def get_algorithm(self) -> BaseSolver:
-        """Get the algorithm from the settings
+        """Get the algorithm from the settings.
 
         Returns:
             BaseSolver: The class of the solver
@@ -150,11 +169,11 @@ class Main:
         else:
             return AStarSolver(self.maze, entry_point, exit_point)
 
-    def get_window_size(self) -> tuple[int, int, int]:
-        """Return the best size of the window
+    def get_window_size(self) -> tuple[int, int]:
+        """Generate the window size with all the other attribute.
 
         Returns:
-            tuple[int, int]: The width and height of the window
+            tuple[int, int]: width, height
         """
         self.cell_size = 40
         width: int = self.config["WIDTH"] * self.cell_size + 2
@@ -162,8 +181,8 @@ class Main:
         (_, w, h) = self.m.mlx_get_screen_size(self.mlx_ptr)
         while height > (h - 50) or width > (w - 50):
             self.cell_size -= 1
-            width: int = self.config["WIDTH"] * self.cell_size + 2
-            height: int = self.config["HEIGHT"] * self.cell_size + 2
+            width = self.config["WIDTH"] * self.cell_size + 2
+            height = self.config["HEIGHT"] * self.cell_size + 2
         self.line_thickness = 10
         while self.cell_size // 2 < self.line_thickness + 1:
             self.line_thickness -= 1
@@ -171,7 +190,7 @@ class Main:
 
     @staticmethod
     def show_help() -> None:
-        """Show help message"""
+        """Show help message."""
         print("------------------------------------")
         print("=== Welcome to the world of maze ===")
         print("------------------------------------")
@@ -190,7 +209,7 @@ class Main:
         pos: tuple[int, int],
         color: int = rgba(255, 255, 255),
     ) -> None:
-        """Draw a cell on the window
+        """Draw a cell on the window.
 
         Args:
             nbr_str (str): the number in hexa to be printed
@@ -244,7 +263,7 @@ class Main:
             i += 1
 
     def get_input(self) -> InputParser.MazeConfig:
-        """Get the input from the config file
+        """Get the input from the config file.
 
         Returns:
             dict: the dictionary that contains every setting
@@ -259,7 +278,7 @@ class Main:
             return self.input_parsers.load_config(sys.argv[1])
 
     def draw_cells(self, maze: list[list[str]], color: int) -> None:
-        """Draw every cell on the window
+        """Draw every cell on the window.
 
         Args:
             maze (list): the maze you want to draw
@@ -297,7 +316,7 @@ class Main:
         )
 
     def draw_path(self, path: str, color: int) -> None:
-        """Draw the path on the window
+        """Draw the path on the window.
 
         Args:
             path (str): the path you want to follow
@@ -334,7 +353,7 @@ class Main:
                 self.m.mlx_do_sync(self.mlx_ptr)
 
     def cell_center(self, pos: tuple[int, int]) -> tuple[int, int]:
-        """Calculate the center of the maze
+        """Calculate the center of the maze.
 
         Args:
             pos (tuple[int, int]): the position of the cell in the grid
@@ -349,13 +368,12 @@ class Main:
 
     @staticmethod
     def get_colors() -> list[tuple[int, int, int, int, str]]:
-        """Return The list of color in the maze
+        """Generate a pallete with all the color and string to the .xpm file.
 
         Returns:
-            list[tuple[int, int, int, int]]: list of 4 color each
+            list[tuple[int, int, int, int, str]]: a list of pallete that has
+             wall, logo, path, visited_cells and background
         """
-        # Mur                  Logo             Path
-
         return [
             (
                 rgba(44, 43, 72),
@@ -387,7 +405,7 @@ class Main:
         color: int,
         thickness: int,
     ) -> None:
-        """Draw line in the window
+        """Draw line in the window.
 
         Args:
             start (tuple[int, int]): The starting point of the maze
@@ -415,7 +433,7 @@ class Main:
         self.m.mlx_hook(self.win_mlx, 33, 0, self.exit_window, None)
 
     def color_cell(self, pos: tuple[int, int], color: int) -> None:
-        """Color a cells
+        """Color a cells.
 
         Args:
             pos (tuple[int, int]): The position of the cell
@@ -429,7 +447,7 @@ class Main:
                 self.m.mlx_pixel_put(self.mlx_ptr, self.win_mlx, x, y, color)
 
     def get_maze_output(self, file_path: str | None = None) -> None:
-        """Give the output of the program in a file
+        """Give the output of the program in a file.
 
         Args:
             file_path (str | None, optional): The path of the output we want.
@@ -447,17 +465,20 @@ class Main:
         exit_point = (
             str(self.config["EXIT"][0]) + "," + str(self.config["EXIT"][1])
         )
-        with open(file_path or "maze.txt", "w") as f:
-            f.write(maze)
-            f.write("\n")
-            f.write(entry)
-            f.write("\n")
-            f.write(exit_point)
-            f.write("\n")
-            f.write(path if path is not None else "No solution")
+        try:
+            with open(file_path or "maze.txt", "w") as f:
+                f.write(maze)
+                f.write("\n")
+                f.write(entry)
+                f.write("\n")
+                f.write(exit_point)
+                f.write("\n")
+                f.write(path if path is not None else "No solution")
+        except FileExistsError as e:
+            print(f"Error: {e}")
 
     def exit_window(self, _: object) -> None:
-        """Exit the window
+        """Exit the window.
 
         Args:
             _ (object): Nothing (just to avoid error with mlx)
@@ -465,7 +486,7 @@ class Main:
         self.m.mlx_loop_exit(self.mlx_ptr)
 
     def new_maze(self) -> None:
-        """Generate a new maze and show it in the window"""
+        """Generate a new maze and show it in the window."""
         # self.m.mlx_clear_window(self.mlx_ptr, self.win_mlx)
         self.m.mlx_string_put(
             self.mlx_ptr,
@@ -487,18 +508,18 @@ class Main:
             self.draw_path(path, self.color_choice[2])
 
     def hide_path(self) -> None:
-        """Hide the path in the window"""
+        """Hide the path in the window."""
         # self.m.mlx_clear_window(self.mlx_ptr, self.win_mlx)
         self.draw_background()
 
         self.draw_cells(self.maze, self.color_choice[0])
 
     def give_output_file(self) -> None:
-        """Give the output file with the OUTPUT_FILE in the config"""
+        """Give the output file with the OUTPUT_FILE in the config."""
         self.get_maze_output(self.config["OUTPUT_FILE"])
 
     def change_color(self) -> None:
-        """Change the color of the cell and path"""
+        """Change the color of the cell and path."""
         if not self.color_choices:
             self.color_choices = self.get_colors()
 
@@ -519,11 +540,12 @@ class Main:
             self.draw_path(path, self.color_choice[2])
 
     def toggle_animation(self) -> None:
-        """Toggle animation with on and off"""
+        """Toggle animation with on and off."""
         self.config["ANIMATION"] = not self.config["ANIMATION"]
         print(f"Animation {"on" if self.config["ANIMATION"] else "off"}!")
 
     def toggle_visited_cell(self) -> None:
+        """Toggle visited cell path."""
         self.showed_visited = not self.showed_visited
         print(
             "Visited cell animation turned "
@@ -531,6 +553,11 @@ class Main:
         )
 
     def draw_visited_cells(self, color: int) -> None:
+        """Draw all the visited to the maze.
+
+        Args:
+            color (int): The color to draw the visited cell
+        """
         visited: list[tuple[int, int]] = self.maze_solver.get_visited_cells()
         for cell in visited:
             tmp: tuple[int, int] = (
@@ -542,7 +569,7 @@ class Main:
                 self.m.mlx_do_sync(self.mlx_ptr)
 
     def key_pressed(self, keynum: int, _: object) -> None:
-        """Handle key pressed by the users
+        """Handle key pressed by the users.
 
         Args:
             keynum (int): the X11 key the user pressed
@@ -572,7 +599,7 @@ class Main:
             self.toggle_visited_cell()
 
     def run(self) -> None:
-        """Run the program"""
+        """Run the program."""
         # self.m.mlx_clear_window(self.mlx_ptr, self.win_mlx)
         self.draw_background()
         self.draw_cells(self.maze, self.color_choice[0])
@@ -582,6 +609,7 @@ class Main:
 
 
 def run() -> None:
+    """Run the program."""
     Main().run()
 
 
@@ -592,4 +620,5 @@ if __name__ == "__main__":
         p.join()
     except KeyboardInterrupt:
         p.terminate()
+    finally:
         print("\n=== Exiting... ===")

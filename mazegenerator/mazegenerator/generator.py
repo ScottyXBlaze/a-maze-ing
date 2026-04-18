@@ -1,24 +1,23 @@
+"""Maze generator that contains The main class MazeGenerator.
+
+Raises:
+    ValueError: If Invalid parameters is given
+"""
+
 from .huntandkill import HuntAndKill
 
 
-class InputValidation:
-    @staticmethod
-    def validate_size(size: tuple[int, int]) -> bool:
-        return 0 < size[0] <= 500 and 0 < size[1] <= 500
-
-
 class MazeGenerator:
-    """Maze Generator class to generate maze"""
+    """Maze Generator class to generate maze."""
 
     def __init__(self, size: tuple[int, int], perfect: bool = True) -> None:
-        """setup and init for all the config of the maze
+        """Init all the config of the maze.
 
         Args:
             size (tuple[int, int]): the size of the maze
             perfect (bool, optional): True to have only one path.
         """
-        input_validation = InputValidation()
-        if not input_validation.validate_size(size):
+        if not self.validate_size(size):
             raise ValueError(
                 "[Error] Invalid size for the maze (negative or too big)"
             )
@@ -29,12 +28,28 @@ class MazeGenerator:
 
         self._perfect = perfect
 
+    @staticmethod
+    def validate_size(size: tuple[int, int]) -> bool:
+        """Check if the maze can be generated properly.
+
+        Args:
+            size (tuple[int, int]): The size of the maze (width, height)
+
+        Returns:
+            bool: True if the maze can be generated
+        """
+        try:
+            return 0 < size[0] <= 500 and 0 < size[1] <= 500
+        except TypeError as e:
+            print(f"Error: {e}")
+            return False
+
     def toggle_perfect(self) -> None:
-        """Toggle generation perfection"""
+        """Toggle generation perfection."""
         self._perfect = not self._perfect
 
     def generate_grid(self) -> list[list[str]]:
-        """Generate a grid full of walls 'F'
+        """Generate a grid full of walls 'F'.
 
         Returns:
             list[list[str]]: grid in 2D
@@ -50,11 +65,11 @@ class MazeGenerator:
     def get_forty_two_positions(
         self,
     ) -> set[tuple[int, int]]:
-        """Checks all the positions for the 42 logo in the maze and None
-        if the maze is too small
+        """Check all the positions for the 42 logo in the maze.
 
         Returns:
             set[tuple[int, int]]: all the positions of the logo in the maze
+             None if the logo doesn't fit
         """
         center_row: int = self._height // 2
         center_col: int = self._width // 2
@@ -77,7 +92,7 @@ class MazeGenerator:
         return set(positions)
 
     def generate_maze(self, seed: int | None = None) -> list[list[str]]:
-        """Generate the maze
+        """Generate the maze.
 
         Args:
             seed (int | None, optional): The seed provided to generate maze.
