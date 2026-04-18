@@ -196,35 +196,6 @@ class HuntAndKill:
                 self._delete_wall_between(pos, opposite_cell_pos)
                 return
 
-    def _restore_one_wall(self, pos: tuple[int, int]) -> None:
-        """Restore a random wall of a cell that has no walls
-
-        Args:
-            pos (tuple[int, int]): The position of the cell
-        """
-        available_neighbors: list[str] = []
-        for direction, (dx, dy) in self._dir_offsets.items():
-            new_row, new_col = pos[0] + dx, pos[1] + dy
-            if self._is_valid_pos(new_row, new_col):
-                available_neighbors.append(direction)
-
-        if not available_neighbors:
-            return
-
-        direction = self._rng.choice(available_neighbors)
-        dx, dy = self._dir_offsets[direction]
-        neighbor = (pos[0] + dx, pos[1] + dy)
-        opposite_path = {"N": "S", "S": "N", "E": "W", "W": "E"}
-        self._add_wall(pos, direction)
-        self._add_wall(neighbor, opposite_path[direction])
-
-    def _avoid_zero_cells(self) -> None:
-        """Verify and solve every cell that has no wall"""
-        for row in range(self._height):
-            for col in range(self._width):
-                if self._maze[row][col] == "0":
-                    self._restore_one_wall((row, col))
-
     def check_directions_unvisited(self, pos: tuple[int, int]) -> list[str]:
         """Checks every directions of a cell that are unvisited
 
@@ -271,6 +242,38 @@ class HuntAndKill:
             dx, dy = self._dir_offsets[direction]
             new_pos = (pos[0] + dx, pos[1] + dy)
             self._delete_wall_between(pos, new_pos)
+
+    def avoid_3x3(self) -> None:
+        # Find a cell with 0 wall
+        no_walls: list[tuple[int, int]] = []
+        for row in range(self._width):
+            for col in range(self._height):
+                if self._maze[row][col] == "0":
+                    no_walls.append((row, col))
+        # Check all the neigbord and see if they only have one or two walls
+        # based on their position diagonal or not
+
+        for no_wall in no_walls:
+            if self.is_open(no_wall):
+                self._add_wall(no_wall, "N")
+                opposite = no_wall[0] - 1, no_wall[1]
+                self._add_wall(opposite, "S")
+
+    def is_open(self, pos: tuple[int, int]) -> bool:
+        for direction, offset in self._dir_offsets.items():
+            tmp = pos[0] + offset[0], pos[1] + offset[1]
+            if self.check_walls(tmp) != ["N"]:
+                return False
+
+        checks = "NE"
+        offset = pos
+        for check in checks:
+            tmp = self._dir_offsets.get(check)
+            offset = offset[0] + tmp[0], offset[1] + tmp[1]
+        for wall in self.check_walls(offset):
+            if wall in checks:
+                continue
+            return True
 
     def run(self) -> None:
         """Run the Hunt and Kill algorithm to solve the maze"""

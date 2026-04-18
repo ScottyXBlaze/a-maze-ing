@@ -59,7 +59,24 @@ class Main:
     def __init__(self) -> None:
         """Every Initialisation starts here"""
 
+        self.m: Any = mlx.Mlx()
         self.config: InputParser.MazeConfig = self.get_input()
+
+        self.mlx_ptr: Any = self.m.mlx_init()
+        self.width, self.height = self.get_window_size()
+        self.win_mlx: Any = self.m.mlx_new_window(
+            self.mlx_ptr, self.width, self.height, "A-Maze-Ing!"
+        )
+
+        self.m.mlx_string_put(
+            self.mlx_ptr,
+            self.win_mlx,
+            self.width - 200,
+            self.height - 50,
+            rgba(25, 22, 111),
+            "Please wait...",
+        )
+        self.m.mlx_do_sync(self.mlx_ptr)
 
         self.color_choices = self.get_colors()
 
@@ -67,8 +84,6 @@ class Main:
 
         self.showed_path = 0
         self.showed_visited = 0
-
-        self.m: Any = mlx.Mlx()
 
         self.maze_generator = MazeGenerator(
             (self.config["WIDTH"], self.config["HEIGHT"]),
@@ -79,12 +94,6 @@ class Main:
         )
 
         self.maze_solver = self.get_algorithm()
-
-        self.mlx_ptr: Any = self.m.mlx_init()
-        self.cell_size, self.width, self.height = self.get_window_size()
-        self.win_mlx: Any = self.m.mlx_new_window(
-            self.mlx_ptr, self.width, self.height, "A-Maze-Ing!"
-        )
 
         self.backgrounds = self.init_background()
         self.background = self.backgrounds.get(self.color_choice[4], ImgData())
@@ -147,15 +156,18 @@ class Main:
         Returns:
             tuple[int, int]: The width and height of the window
         """
-        self.cell_size = 25
+        self.cell_size = 40
         width: int = self.config["WIDTH"] * self.cell_size + 2
         height: int = self.config["HEIGHT"] * self.cell_size + 2
         (_, w, h) = self.m.mlx_get_screen_size(self.mlx_ptr)
-        while height > h or width > w:
+        while height > (h - 50) or width > (w - 50):
             self.cell_size -= 1
             width: int = self.config["WIDTH"] * self.cell_size + 2
             height: int = self.config["HEIGHT"] * self.cell_size + 2
-        return self.cell_size, width, height
+        self.line_thickness = 10
+        while self.cell_size // 2 < self.line_thickness + 1:
+            self.line_thickness -= 1
+        return width, height
 
     @staticmethod
     def show_help() -> None:
@@ -294,11 +306,10 @@ class Main:
         x: int = self.config["ENTRY"][0] * self.cell_size
         y: int = self.config["ENTRY"][1] * self.cell_size
         path_color: int = color
-        line_thickness: int = 2
 
         start_center: tuple[int, int] = self.cell_center((x, y))
         self.draw_thick_segment(
-            start_center, start_center, path_color, line_thickness
+            start_center, start_center, path_color, self.line_thickness
         )
 
         for direction in path:
@@ -317,7 +328,7 @@ class Main:
                 self.cell_center(old_pos),
                 self.cell_center((x, y)),
                 path_color,
-                line_thickness,
+                self.line_thickness,
             )
             if self.config["ANIMATION"]:
                 self.m.mlx_do_sync(self.mlx_ptr)
@@ -455,20 +466,29 @@ class Main:
 
     def new_maze(self) -> None:
         """Generate a new maze and show it in the window"""
+        # self.m.mlx_clear_window(self.mlx_ptr, self.win_mlx)
+        self.m.mlx_string_put(
+            self.mlx_ptr,
+            self.win_mlx,
+            self.width - 200,
+            self.height - 50,
+            rgba(25, 22, 111),
+            "Please wait...",
+        )
+        self.m.mlx_do_sync(self.mlx_ptr)
         self.maze = self.maze_generator.generate_maze()
         self.maze_solver.set_new_maze(self.maze)
-        self.m.mlx_clear_window(self.mlx_ptr, self.win_mlx)
         self.draw_background()
         self.draw_cells(self.maze, self.color_choice[0])
         if self.showed_path:
-            self.draw_visited_cells(self.color_choice[3])
-        if self.showed_path:
+            if self.showed_visited:
+                self.draw_visited_cells(self.color_choice[3])
             path = self.maze_solver.solve_as_string()
             self.draw_path(path, self.color_choice[2])
 
     def hide_path(self) -> None:
         """Hide the path in the window"""
-        self.m.mlx_clear_window(self.mlx_ptr, self.win_mlx)
+        # self.m.mlx_clear_window(self.mlx_ptr, self.win_mlx)
         self.draw_background()
 
         self.draw_cells(self.maze, self.color_choice[0])
@@ -485,14 +505,14 @@ class Main:
         self.color_choice = random.choice(self.color_choices)
         self.color_choices.remove(self.color_choice)
 
-        self.m.mlx_clear_window(self.mlx_ptr, self.win_mlx)
+        # self.m.mlx_clear_window(self.mlx_ptr, self.win_mlx)
         self.background = self.backgrounds.get(self.color_choice[4], ImgData())
 
         self.draw_background()
 
         self.draw_cells(self.maze, self.color_choice[0])
 
-        if self.showed_visited:
+        if self.showed_path and self.showed_visited:
             self.draw_visited_cells(self.color_choice[3])
         if self.showed_path:
             path = self.maze_solver.solve_as_string()
@@ -553,6 +573,7 @@ class Main:
 
     def run(self) -> None:
         """Run the program"""
+        # self.m.mlx_clear_window(self.mlx_ptr, self.win_mlx)
         self.draw_background()
         self.draw_cells(self.maze, self.color_choice[0])
         self.m.mlx_hook(self.win_mlx, 33, 0, self.exit_window, None)

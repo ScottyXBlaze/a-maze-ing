@@ -1,15 +1,15 @@
-[project]
+[tool.poetry]
 name = "mazegenerator"
 version = "0.1.0"
-description = ""
-authors = [
-    {name = "nyramana",email = "nyramana@student.42antananarivo.mg"}
-]
+description = "A simple maze generator"
+authors = ["nyramana <nyramana@student.42antananarivo.mg>", "tiana-an <tiana-an@student.42antananarivo.mg>"]
+
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = [
-]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

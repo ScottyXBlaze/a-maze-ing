@@ -44,7 +44,7 @@ Creating an umperfect cell is really easy. After creating the perfect maze using
 
 ## Instruction:
 
-First insall the `.whl` file or copy the folder into your project. Then import the library `mazegenerator` and that's all you need to use all the generation and methods inside it. 
+First insall the `.whl` or `.tar.gz` file or copy the folder into your project. Then import the library `mazegenerator` and that's all you need to use all the generation and methods inside it. 
 
  **Example:** 
 
