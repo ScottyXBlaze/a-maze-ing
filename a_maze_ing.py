@@ -147,7 +147,7 @@ class Main:
         Returns:
             tuple[int, int]: The width and height of the window
         """
-        self.cell_size = 19
+        self.cell_size = 25
         width: int = self.config["WIDTH"] * self.cell_size + 2
         height: int = self.config["HEIGHT"] * self.cell_size + 2
         (_, w, h) = self.m.mlx_get_screen_size(self.mlx_ptr)
@@ -460,7 +460,7 @@ class Main:
         self.m.mlx_clear_window(self.mlx_ptr, self.win_mlx)
         self.draw_background()
         self.draw_cells(self.maze, self.color_choice[0])
-        if self.showed_visited:
+        if self.showed_path:
             self.draw_visited_cells(self.color_choice[3])
         if self.showed_path:
             path = self.maze_solver.solve_as_string()
@@ -550,7 +550,6 @@ class Main:
             self.toggle_animation()
         elif keynum == 100:
             self.toggle_visited_cell()
-            # self.draw_background()
 
     def run(self) -> None:
         """Run the program"""
@@ -561,13 +560,12 @@ class Main:
         self.m.mlx_loop(self.mlx_ptr)
 
 
-def main() -> None:
-    """The main program"""
+def run() -> None:
     Main().run()
 
 
 if __name__ == "__main__":
-    p = multiprocessing.Process(target=main)
+    p = multiprocessing.Process(target=run)
     try:
         p.start()
         p.join()

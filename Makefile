@@ -24,12 +24,12 @@ ${VENV}:
 
 
 run: ${VENV}
-	@${PY} a_maze_ing.py config.txt
+	@${PY} a_maze_ing.py config.conf
 
 install: ${VENV}
 
 debug: ${VENV}
-	@${PY} -m pdb a_maze_ing.py config.txt
+	@${PY} -m pdb a_maze_ing.py config.conf
 
 clean:
 	@echo "${C_BLUE}Removing temporary files or caches\n...${C_RESET}"

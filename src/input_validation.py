@@ -12,8 +12,8 @@ class InputParser:
     Raises:
         ValueError: If the config file is invalid or if there is a missing key
     """
-    class PartialMazeConfig(TypedDict, total=False):
 
+    class PartialMazeConfig(TypedDict, total=False):
         WIDTH: int
         HEIGHT: int
         ENTRY: tuple[int, int]
@@ -25,8 +25,7 @@ class InputParser:
         ALGO: str
 
     class MazeConfig(TypedDict):
-        """General config type hint
-        """
+        """General config type hint"""
 
         WIDTH: int
         HEIGHT: int
@@ -39,8 +38,7 @@ class InputParser:
         ALGO: str
 
     def __init__(self) -> None:
-        """Everything start here
-        """
+        """Everything start here"""
 
         self.parsers = Parser()
 
@@ -161,38 +159,39 @@ class InputParser:
         if not (0 < config["WIDTH"] <= 300):
             raise ValueError(
                 f"Invalid config value for WIDTH: {config['WIDTH']}"
-                )
+            )
         if not (0 < config["HEIGHT"] <= 150):
             raise ValueError(
                 f"Invalid config value for HEIGHT: {config['HEIGHT']}"
-                )
+            )
         if not (
             0 <= config["ENTRY"][0] < config["WIDTH"]
             and 0 <= config["ENTRY"][1] < config["HEIGHT"]
         ):
             raise ValueError(
                 f"Invalid config value for ENTRY: {config['ENTRY']}"
-                )
+            )
         if not (
             0 <= config["EXIT"][0] < config["WIDTH"]
             and 0 <= config["EXIT"][1] < config["HEIGHT"]
         ):
             raise ValueError(
                 f"Invalid config value for EXIT: {config['EXIT']}"
-                )
+            )
         if config["ENTRY"] == config["EXIT"]:
             raise ValueError(
                 "Invalid config: ENTRY and EXIT cannot be the same"
-                )
+            )
 
         if config["WIDTH"] <= 8 or config["HEIGHT"] <= 6:
             print("=== WARNING! ===")
             print(
                 "The maze is too small to include the '42' pattern.",
-                "ENTRY and EXIT can be anywhere."
-                )
+                "ENTRY and EXIT can be anywhere.",
+            )
         for pos in self.get_forty_two_positions(
-                config["WIDTH"], config["HEIGHT"]):
+            config["WIDTH"], config["HEIGHT"]
+        ):
             pos_xy = (pos[1], pos[0])
             if pos_xy == config["ENTRY"] or pos_xy == config["EXIT"]:
                 raise ValueError(
@@ -201,8 +200,8 @@ class InputParser:
                 )
 
     def is_complete_config(
-            self, config: PartialMazeConfig
-            ) -> TypeGuard[MazeConfig]:
+        self, config: PartialMazeConfig
+    ) -> TypeGuard[MazeConfig]:
         """Check if every config is in the dictionary
 
         Args:
@@ -248,16 +247,21 @@ class InputParser:
         """
         config_path = Path(path)
         config: InputParser.PartialMazeConfig = {}
+        try:
+            with config_path.open("r") as file:
+                for line in file:
+                    try:
+                        self.parse_line(line, config)
+                    except ValueError as e:
+                        print(f"Error parsing line: {line.strip()}")
+                        print(f"Reason: {e}")
+                        print("Using default value...")
+                        return self.default_config
+        except (FileNotFoundError, PermissionError) as e:
+            print(f"Error loading the file: {e}")
+            print("Using default value...")
+            return self.default_config
 
-        with config_path.open("r") as file:
-            for line in file:
-                try:
-                    self.parse_line(line, config)
-                except ValueError as e:
-                    print(f"Error parsing line: {line.strip()}")
-                    print(f"Reason: {e}")
-                    print("Using default value...")
-                    return self.default_config
         try:
             return self.check_missing(config)
         except ValueError as e:
